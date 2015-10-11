@@ -268,7 +268,9 @@ class RouterTest extends PHPUnit_Framework_TestCase
 			'QUERY_STRING' => '',
 			'REMOTE_ADDR' => 'remote',
 			'HTTP_USER_AGENT' => 'test',
-			], $server), $get, $post);
+			], $server), $get, new \Base\Arr($post));
+		
+		return $request;
 	}
 
 }
