@@ -285,7 +285,7 @@ class Query
 
 		$separator = '';
 		foreach ($this->values as $identifier => $value) {
-			if ($value instanceof \YF\Core\Database\Raw) {
+			if ($value instanceof \Base\Database\Raw) {
 				$query .= $separator . $value->expression() . ' ';
 			} else {
 				$params [] = $value;
@@ -343,7 +343,7 @@ class Query
 			$alias = false;
 		}
 
-		if ($table instanceof \YF\Core\Database\Query) {
+		if ($table instanceof \Base\Database\Query) {
 			list($subQuery, $subParams) = $table->compile();
 			$params = array_merge($params, $subParams);
 			$query.= 'FROM (' . $subQuery . ') ';
@@ -403,7 +403,7 @@ class Query
 		// group by
 		$separator = 'GROUP BY ';
 		foreach ($this->group as $identifier) {
-			if ($identifier instanceof \YF\Core\Database\Raw) {
+			if ($identifier instanceof \Base\Database\Raw) {
 				$query.= $separator . $identifier->expression() . ' ';
 			} else {
 				$query.= $separator . $this->quoteIdentifier($identifier) . ' ';
@@ -422,7 +422,7 @@ class Query
 		$separator = 'ORDER BY ';
 		foreach ($this->order as $identifier => $direction) {
 			$direction = strtoupper($direction) === 'DESC' ? 'DESC' : 'ASC';
-			if ($identifier instanceof \YF\Core\Database\Raw) {
+			if ($identifier instanceof \Base\Database\Raw) {
 				$query.= $separator . $identifier->expression() . ' ' . $direction . ' ';
 			} else {
 				$query.= $separator . $this->quoteIdentifier($identifier) . ' ' . $direction . ' ';
@@ -477,7 +477,7 @@ class Query
 		$separator = '';
 		foreach ($this->values as $identifier => $value) {
 			$query .= $separator . $this->quoteIdentifier($identifier) . ' = ';
-			if ($value instanceof \YF\Core\Database\Raw) {
+			if ($value instanceof \Base\Database\Raw) {
 				$query .= $value->expression() . ' ';
 			} elseif ($value === null) {
 				$query .= 'DEFAULT(' . $this->quoteIdentifier($identifier) . ') ';
@@ -536,14 +536,14 @@ class Query
 					$query .= $condition['operator'] . ' ';
 					$query .= $this->quoteIdentifier($condition['second']) . ' ';
 				} else {
-					if ($condition['second'] instanceof \YF\Core\Database\Raw) {
+					if ($condition['second'] instanceof \Base\Database\Raw) {
 						$query .= $condition['operator'] . ' ';
 						$query .= $condition['second']->expression() . ' ';
 					} elseif ($condition['operator'] == '=' && $condition['second'] === null) {
 						$query .= 'IS NULL ';
 					} elseif (($condition['operator'] == '!=' || $condition['operator'] == '<>') && $condition['second'] === null) {
 						$query .= 'IS NOT NULL ';
-					} elseif ($condition['second'] instanceof \YF\Core\Database\Query) {
+					} elseif ($condition['second'] instanceof \Base\Database\Query) {
 						list($subQuery, $subParams) = $condition['second']->compile();
 						$params = array_merge($params, $subParams);
 						$query .= $condition['operator'] . ' ';

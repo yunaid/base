@@ -16,9 +16,9 @@ class Console
 
 	/**
 	 * Initialize console
-	 * @param \YF\Core\Profile $profile
-	 * @param \YF\Core\Request $request
-	 * @param \YF\Core\Router $router
+	 * @param \Base\Profile $profile
+	 * @param \Base\Request $request
+	 * @param \Base\Router $router
 	 */
 	public function __construct($profile = null, $request = null, $router = null)
 	{
@@ -109,7 +109,7 @@ class Console
 			$show = 'true';
 
 			$rows = $this->renderRow([
-				'<br /><span class="yf-console-error">' . get_class($this->exception) . ': ' . strip_tags($this->exception->getMessage()) . '</span><br /><br />'
+				'<br /><span class="base-console-error">' . get_class($this->exception) . ': ' . strip_tags($this->exception->getMessage()) . '</span><br /><br />'
 				], false);
 
 			$rows .= $this->renderRow([
@@ -450,7 +450,7 @@ class Console
 	 */
 	public function renderSource($file, $linenr, $padding = 5)
 	{
-		$output = '<span class="yf-console-source-file">' . $file . '</span><br />';
+		$output = '<span class="base-console-source-file">' . $file . '</span><br />';
 
 
 		if (!$file || !is_readable($file)) {
@@ -471,29 +471,29 @@ class Console
 
 			if ($line >= $range['start']) {
 				$row = htmlspecialchars($row, ENT_NOQUOTES);
-				$row = '<span class="yf-console-source-line-number">' . sprintf($format, $line) . '</span> ' . $row;
+				$row = '<span class="base-console-source-line-number">' . sprintf($format, $line) . '</span> ' . $row;
 
 				if ($line === $linenr) {
-					$row = '<span class="yf-console-source-line yf-console-source-highlight">' . $row . '</span>';
+					$row = '<span class="base-console-source-line base-console-source-highlight">' . $row . '</span>';
 				} else {
-					$row = '<span class="yf-console-source-line">' . $row . '</span>';
+					$row = '<span class="base-console-source-line">' . $row . '</span>';
 				}
 				$source .= $row;
 			}
 		}
 		// Close the file
 		fclose($file);
-		return $output . '<pre class="yf-console-source"><code>' . $source . '</code></pre>';
+		return $output . '<pre class="base-console-source"><code>' . $source . '</code></pre>';
 	}
 
 	/**
 	 * Templates using {{var}}, use with str_replace
 	 */
-	protected $template = <<<YF
+	protected $template = <<<BASE
 <style>
 			
 	
-	#yf-console{
+	#base-console{
 		position: fixed;
 		z-index: 100000;
 		width: 100%;
@@ -502,16 +502,16 @@ class Console
 		margin-top: -40px;
 		opacity: 0.9;
 	}
-	#yf-console pre{
+	#base-console pre{
 		font-family: monospace;
 	}
-	.yf-console-header{
+	.base-console-header{
 		background: black;
 		width: 100%;
 		height: 40px;
 	}
 	
-	.yf-console-button {
+	.base-console-button {
 		display: block;
 		float: left;
 		eight: 18px;
@@ -526,17 +526,17 @@ class Console
 		cursor: pointer;
 	}
 	
-	.yf-console-button-minimize, 
-	.yf-console-button-close
+	.base-console-button-minimize, 
+	.base-console-button-close
 	{
 		float:right;
 	}
 	
-	.yf-console-button-minimize{
+	.base-console-button-minimize{
 		display: none;
 	}
 	
-	.yf-console-body{
+	.base-console-body{
 		display: block;
 		width: 100%;
 		height: 100%;
@@ -544,20 +544,20 @@ class Console
 		background-color: #DDD;
 		font-family: arial;
 	}
-	.yf-console-body table{
+	.base-console-body table{
 		font-size: 13px;
 		border-spacing: 0;
 	}
 	
-	.yf-console-group .odd{
+	.base-console-group .odd{
 		background-color: #FFF;
 	}
 	
-	.yf-console-group .even{
+	.base-console-group .even{
 		background-color: #EEE;
 	}
 
-	.yf-console-group td{
+	.base-console-group td{
 		margin: 0;
 		padding: 6px;
 		border-right: 1px solid #EEE;
@@ -567,35 +567,35 @@ class Console
 	}
 		
 
-	.yf-console-linenr{
+	.base-console-linenr{
 		width: 20px;
 		color: white;
 		text-align: center;
 		background-color: #777;
 	}
 	
-	.yf-console-group .even .yf-console-linenr{
+	.base-console-group .even .base-console-linenr{
 		background-color: #333;
 	}
 		
-	.yf-console-source{
+	.base-console-source{
 		background-color: #000;
 	}
 		
-	.yf-console-source-file{
+	.base-console-source-file{
 		
 	}
-	.yf-console-error{
+	.base-console-error{
 		font-size: 20px;
 		color: #990000;
 	}
 		
 		
-	.yf-console-source-line{
+	.base-console-source-line{
 		color: FFF;
 	}
 		
-	.yf-console-source-highlight{
+	.base-console-source-highlight{
 		color: FF9999;
 		background-color: #555;
 	}
@@ -603,13 +603,13 @@ class Console
 
 </style>
 
-<div id="yf-console">
-	<div class="yf-console-header">
+<div id="base-console">
+	<div class="base-console-header">
 		{{buttons}}
-		<span class="yf-console-button yf-console-button-close">&times;</span>
-		<span class="yf-console-button yf-console-button-minimize">&minus;</span>
+		<span class="base-console-button base-console-button-close">&times;</span>
+		<span class="base-console-button base-console-button-minimize">&minus;</span>
 	</div>
-	<div class="yf-console-body">
+	<div class="base-console-body">
 		{{groups}}
 	</div>
 </div>
@@ -617,27 +617,27 @@ class Console
 <script>
 	(function(w,d){
 		// set the height
-		d.querySelector('.yf-console-body').style.height = w.innerHeight - 100 + 'px';
+		d.querySelector('.base-console-body').style.height = w.innerHeight - 100 + 'px';
 			
 		// hide all content
-		var groups = d.querySelectorAll('.yf-console-group');
+		var groups = d.querySelectorAll('.base-console-group');
 		for(var i=0;i<groups.length; i++){
 			groups[i].style.display = 'none';
 		}
 		
 		// add listeners to buttons
-		var buttons = d.querySelectorAll('.yf-console-button');
+		var buttons = d.querySelectorAll('.base-console-button');
 		for(var i=0;i<buttons.length; i++){
 			buttons[i].onclick = function(){
 			
 				// move console up
-				d.querySelector('#yf-console').style.top = '100px';
+				d.querySelector('#base-console').style.top = '100px';
 			
 				// show minimize button
-				d.querySelector('.yf-console-button-minimize').style.display = 'block';
+				d.querySelector('.base-console-button-minimize').style.display = 'block';
 			
 				// turn all buttons white
-				var buttons = d.querySelectorAll('.yf-console-button');
+				var buttons = d.querySelectorAll('.base-console-button');
 				for(var i=0;i<buttons.length; i++){
 					buttons[i].style.color = 'white';
 					buttons[i].style.borderColor = 'white';
@@ -648,7 +648,7 @@ class Console
 				this.style.borderColor = '#99CCFF';
 				
 				// hide all the content groups
-				var groups = d.querySelectorAll('.yf-console-group');
+				var groups = d.querySelectorAll('.base-console-group');
 				for(var i=0;i<groups.length; i++){
 					groups[i].style.display = 'none';
 				}
@@ -661,39 +661,39 @@ class Console
 		}
 
 		// minimize button
-		d.querySelector('.yf-console-button-minimize').onclick = function(){
-			d.querySelector('#yf-console').style.top = '100%';
-			d.querySelector('.yf-console-button-minimize').style.display = 'none';
+		d.querySelector('.base-console-button-minimize').onclick = function(){
+			d.querySelector('#base-console').style.top = '100%';
+			d.querySelector('.base-console-button-minimize').style.display = 'none';
 		};
 		
 		// close button
-		d.querySelector('.yf-console-button-close').onclick = function(){
-			var node = 	d.querySelector('#yf-console');
+		d.querySelector('.base-console-button-close').onclick = function(){
+			var node = 	d.querySelector('#base-console');
 			node.parentNode.removeChild(node);
 		};
 			
 		// start with open console on a defined tab
 		var show = {{show}};
 		if(show){
-			d.querySelector('.yf-console-button[data-for={{active}}]').onclick();
+			d.querySelector('.base-console-button[data-for={{active}}]').onclick();
 		}
 	})(window,document);
 </script>
-YF;
-	protected $templateButton = <<<YF
-<span class="yf-console-button" data-for="{{group}}">{{label}}</span>
-YF;
-	protected $templateGroup = <<<YF
-<div class="yf-console-group" data-id="{{group}}">
+BASE;
+	protected $templateButton = <<<BASE
+<span class="base-console-button" data-for="{{group}}">{{label}}</span>
+BASE;
+	protected $templateGroup = <<<BASE
+<div class="base-console-group" data-id="{{group}}">
 	<table width="100%">
 		{{rows}}
 	</table>
 </div>
-YF;
-	protected $templateRow = <<<YF
-<tr class="yf-console-row {{oddeven}}">
-	<td class="yf-console-linenr">{{nr}}</td>{{row}}
+BASE;
+	protected $templateRow = <<<BASE
+<tr class="base-console-row {{oddeven}}">
+	<td class="base-console-linenr">{{nr}}</td>{{row}}
 </tr>
-YF;
+BASE;
 
 }

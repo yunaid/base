@@ -26,7 +26,7 @@ class Connection
 	/**
 	 * Construct
 	 * @param array $params
-	 * @param \YF\Core\Profile $profile
+	 * @param \Base\Profile $profile
 	 */
 	public function __construct($params, $profile = null)
 	{

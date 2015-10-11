@@ -68,7 +68,7 @@ class Part
 	 * Set value
 	 * @param Mixed $key
 	 * @param Mixed $value
-	 * @return \YF\Core\View\Part
+	 * @return \Base\View\Part
 	 */
 	public function set($key, $value = null)
 	{
@@ -87,7 +87,7 @@ class Part
 	 * Bind value
 	 * @param String $key
 	 * @param Mixed $value
-	 * @return \YF\Core\View
+	 * @return \Base\View
 	 */
 	public function bind($key, & $value)
 	{

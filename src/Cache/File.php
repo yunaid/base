@@ -110,7 +110,7 @@ class File
 	 * @param string $name
 	 * @param mixed $value
 	 * @param int $lifetime
-	 * @throws \YF\Core\Exception
+	 * @throws \Base\CacheFileException
 	 */
 	public function set($name, $value, $lifetime = 3600)
 	{
