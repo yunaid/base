@@ -42,9 +42,8 @@ class File
 	
 	/**
 	 * Get a stored value
-	 * @param string $group
 	 * @param string $name
-	 * @param mixed $default
+	 * @param string|array $default
 	 * @return mixed
 	 */
 	public function get($name, $default = null)
@@ -106,9 +105,8 @@ class File
 
 	/**
 	 * Set a value
-	 * @param string $group
 	 * @param string $name
-	 * @param mixed $value
+	 * @param string|array $value
 	 * @param int $lifetime
 	 * @throws \Base\CacheFileException
 	 */
@@ -146,7 +144,6 @@ class File
 	/**
 	 * Delete one or more values
 	 * Wildcard allowed
-	 * @param string $group
 	 * @param string $name
 	 */
 	public function delete($name = '*')

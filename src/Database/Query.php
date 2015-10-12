@@ -2,10 +2,14 @@
 
 namespace Base\Database;
 
+use \Base\Database\Connection as Connection;
+
 class Query
 {
-
+	// the connection
 	protected $connection = null;
+	
+	// 
 	protected $quote = null;
 	protected $type = null;
 	protected $query = '';
@@ -30,14 +34,26 @@ class Query
 	protected $result = null;
 
 	
-	public function __construct($connection, $type = null)
+	/**
+	 * Create a new query and get quote style from connection
+	 * @param \Base\Database\Connection $connection
+	 * @param string $type
+	 */
+	public function __construct( Connection $connection, $type = null)
 	{
 		$this->connection = $connection;
 		$this->type = $type;
 		$this->quote = $connection->quote();
 	}
 
-	public function query($query, $params = [])
+	
+	/**
+	 * Set a query with params
+	 * @param string $query
+	 * @param array $params
+	 * @return string
+	 */
+	public function query($query, array $params = [])
 	{
 		$this->query = $query;
 		$this->params = $params;
@@ -45,27 +61,46 @@ class Query
 	}
 
 
+	/**
+	 * Add values to select.
+	 * Pass field directly as arguments
+	 * Pass ['field1', 'alias'], 'field2' to select as alias
+	 * @return \Base\Database\Query
+	 */
 	public function select()
 	{
 		$this->select = array_merge($this->select, func_get_args());
 		return $this;
 	}
 
-
+	/**
+	 * Set table name
+	 * @param string $table
+	 * @return \Base\Database\Query
+	 */
 	public function table($table)
 	{
 		$this->table = $table;
 		return $this;
 	}
 
-
+	/**
+	 * Add distinct clause
+	 * @param string|boolean $distinct
+	 * @return \Base\Database\Query
+	 */
 	public function distinct($distinct = true)
 	{
 		$this->distinct = $distinct;
 		return $this;
 	}
 
-
+	
+	/**
+	 * Set table name
+	 * @param string $table
+	 * @return \Base\Database\Query
+	 */
 	public function from($table)
 	{
 		$this->table = $table;
@@ -73,6 +108,12 @@ class Query
 	}
 
 
+	/**
+	 * Set values for update (alias for :: values)
+	 * @param string|array $columnOrValues
+	 * @param string|int $value
+	 * @return \Base\Database\Query
+	 */
 	public function set($columnOrValues, $value = null)
 	{
 		$this->values($columnOrValues, $value);
@@ -80,6 +121,12 @@ class Query
 	}
 
 
+	/**
+	 * Set values
+	 * @param string|array $columnOrValues
+	 * @param string $value
+	 * @return \Base\Database\Query
+	 */
 	public function values($columnOrValues, $value = null)
 	{
 		if (is_array($columnOrValues)) {
@@ -91,6 +138,12 @@ class Query
 	}
 
 
+	/**
+	 * Add a join
+	 * @param string $table
+	 * @param string $type
+	 * @return \Base\Database\Query
+	 */
 	public function join($table, $type = 'INNER')
 	{
 		$this->joins[] = [
@@ -103,6 +156,14 @@ class Query
 	}
 
 
+	/**
+	 * Add on clause for active join
+	 * @param type $firstOrCallable
+	 * @param type $operatorOrSecond
+	 * @param type $second
+	 * @return \Base\Database\Query
+	 * @throws QueryException
+	 */
 	public function on($firstOrCallable, $operatorOrSecond = null, $second = null)
 	{
 		if (count($this->joins) == 0) {
@@ -308,7 +369,7 @@ class Query
 		$query = 'SELECT ';
 
 		//distinct
-		if ($this->distinct) {
+		if ($this->distinct === true) {
 			$query.= 'DISTINCT ';
 		}
 

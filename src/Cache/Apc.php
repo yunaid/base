@@ -22,7 +22,7 @@ class APC
 	/**
 	 * Get a value from cache
 	 * @param string $name
-	 * @param mixed $default
+	 * @param atring|array $default
 	 * @return mixed
 	 */
 	public function get($name, $default = null)

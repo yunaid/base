@@ -2,6 +2,8 @@
 
 namespace Base\Database;
 
+use \Base\Profile as Profile;
+
 class DatabaseException extends \Exception{};
 
 class Connection
@@ -9,8 +11,10 @@ class Connection
 
 	// the default quote that should be used
 	protected $quote = '`';
+	
 	// The actual conneciton
 	protected $connection = null;
+	
 	// connection params
 	protected $params = [
 		'dsn' => '',
@@ -19,6 +23,7 @@ class Connection
 		'options' => [],
 		'profile' => false,
 	];
+	
 	// profile object
 	protected $profile = null;
 
@@ -28,7 +33,7 @@ class Connection
 	 * @param array $params
 	 * @param \Base\Profile $profile
 	 */
-	public function __construct($params, $profile = null)
+	public function __construct(array $params, Profile $profile = null)
 	{
 		$this->params = array_merge($this->params, $params);
 		$this->profile = $profile;
@@ -66,9 +71,9 @@ class Connection
 	 * @param string $type select / insert update / delete
 	 * @param string $id the name of the id column for lastInsertId
 	 * @return mixed resultset, rowcount of last inserted id
-	 * @throws DatabaseException
+	 * @throws \Base\DatabaseException
 	 */
-	public function execute($query, $params, $type = null, $id = 'id')
+	public function execute($query, array $params, $type = null, $id = 'id')
 	{
 		$this->connect();
 		$statement = $this->connection->prepare($query);
@@ -96,5 +101,4 @@ class Connection
 			return $statement->rowCount();
 		}
 	}
-
 }
