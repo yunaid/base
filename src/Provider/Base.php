@@ -20,78 +20,77 @@ class Base
 			
 		$container->share([
 			'base.cache',
-			'cache.adapter',
-			'cli',
-			'config',
-			'console',
-			'cookie',
-			'database',
-			'encryption',
-			'exception.handler',
-			'log',
-			'loader',
-			'orm.schema',
-			'profile',
-			'http.request',
-			'http.response',
-			'router',
-			'session',
-			'view.factory',
-			'view.url',
+			'base.cache.adapter',
+			'base.cli',
+			'base.config',
+			'base.console',
+			'base.cookie',
+			'base.database',
+			'base.encryption',
+			'base.exception.handler',
+			'base.http.request',
+			'base.http.response',
+			'base.log',
+			'base.loader',
+			'base.orm.schema',
+			'base.profile',
+			'base.router',
+			'base.session',
+			'base.view.factory',
 		])->group([
-			'cache' => key($config['cache']),
-			'cache.adapter' => key($config['cache.adapter']),
-			'database' => key($config['database']),
-			'log' => key($config['log']),
-			'session' => key($config['session']),
+			'base.cache' => key($config['cache']),
+			'base.cache.adapter' => key($config['cache.adapter']),
+			'base.database' => key($config['database']),
+			'base.log' => key($config['log']),
+			'base.session' => key($config['session']),
 		])->set([
-			'arr' => function($container, $data = []) {
+			'base.arr' => function($container, $data = []) {
 				return new \Base\Arr($data);
 			},
-			'cache' => function($container, $name, $adapter = null)  {
-				$config = $container->get('config')->get(['cache', $name ], null);
+			'base.cache' => function($container, $name, $adapter = null)  {
+				$config = $container->get('base.config')->get(['cache', $name ], null);
 				if($config) {
-					$adapter = $container->get('cache.adapter', $config['adapter']);
+					$adapter = $container->get('base.cache.adapter', $config['adapter']);
 				} else {
-					$adapter = $container->get('cache.adapter');
+					$adapter = $container->get('base.cache.adapter');
 				}
 				return new \Base\Cache($name, $adapter, $config);
 			},
-			'cache.adapter' => function($container, $name) {
-				$config = $container->get('config')->get(['cache.adapter', $name]);
+			'base.cache.adapter' => function($container, $name) {
+				$config = $container->get('base.config')->get(['cache.adapter', $name]);
 				return new $config['class'](
 					$config['params']
 				);
 			},
-			'cli' => function($container) {
+			'base.cli' => function($container) {
 				return new \Base\CLI($_SERVER['argv']);
 			}, 
-			'command' => function($container, $class) {
+			'base.command' => function($container, $class) {
 				return new $class($container);
 			},
-			'config' => new \Base\Arr($config),
-			'console' => function($container) {
+			'base.config' => new \Base\Arr($config),
+			'base.console' => function($container) {
 				return new \Base\Console(
-					$container->get('profile'), 
-					$container->get('http.request'), 
-					$container->get('router')
+					$container->get('base.profile'), 
+					$container->get('base.http.request'), 
+					$container->get('base.router')
 				);
 			},
-			'controller' => function($container, $class) {
+			'base.controller' => function($container, $class) {
 				return new $class($container);
 			},
-			'cookie' => function($container) {
+			'base.cookie' => function($container) {
 				return new \Base\Cookie(
 					$_COOKIE, 
-					$container->get('http.request'), 
-					$container->get('config')->get('cookie.salt')
+					$container->get('base.http.request'), 
+					$container->get('base.config')->get('cookie.salt')
 				);
 			},
-			'database' => function($container, $name) {
-				$config = $container->get('config')->get(['database', $name]);
+			'base.database' => function($container, $name) {
+				$config = $container->get('base.config')->get(['database', $name]);
 				$connection = new $config['class'](
 					$config['params'], 
-					$container->get('profile')
+					$container->get('base.profile')
 				);
 				return new \Base\Database(
 					function($type) use ($connection){
@@ -102,139 +101,133 @@ class Base
 					}
 				);
 			},
-			'encryption' => function($container) {
+			'base.encryption' => function($container) {
 				return new \Base\Encryption(
-					$container->get('config')->get('encryption')
+					$container->get('base.config')->get('encryption')
 				);
 			},
-			'exception.handler' => function($container) {
+			'base.exception.handler' => function($container) {
 				return new \Base\Exception\Handler();
 			},
-			'form' => function($container, $class) {
+			'base.form' => function($container, $class) {
 				return new $class(
-					$container->get('validation'), 
-					$container->get('http.request'),
+					$container->get('base.validation'), 
+					$container->get('base.http.request'),
 					function($key, $type, $params, $form){
 						return new \Base\Form\Element($key, $type, $params, $form);
 					}
 				);
 			},
-			'http.request' => function($container) {
+			'base.http.request' => function($container) {
 				return new \Base\HTTP\Request(
 					$_SERVER, 
 					$_GET, 
-					$container->get('arr', $_POST)
+					$container->get('base.arr', $_POST)
 				);
 			},
-			'http.response' => function($container) {
+			'base.http.response' => function($container) {
 				return new \Base\HTTP\Response();
 			},
-			'loader' => function($container) {
+			'base.loader' => function($container) {
 				return new \Base\Loader();
 			},
-			'log' => function($container, $name) {
-				$config = $container->get('config')->get(['log', $name]);
+			'base.log' => function($container, $name) {
+				$config = $container->get('base.config')->get(['log', $name]);
 				return new $config['class'](
 					$config['params']
 				);
 			},
-			'model' => function($container, $name, $class) {
+			'base.model' => function($container, $name, $class) {
 				return new $class(
 					$name,
-					$container->get('orm.schema'),
+					$container->get('base.orm.schema'),
 					function($name) use ($container){
-						return $container->get('orm.mapper', $name);
+						return $container->get('base.orm.mapper', $name);
 					},
 					function($name) use ($container){
-						return $container->get('orm.entity', $name);
+						return $container->get('base.orm.entity', $name);
 					},
-					$container->get('database',  $container->get('orm.schema')->get($name)['database'])
+					$container->get('base.database',  $container->get('base.orm.schema')->get($name)['database'])
 				);
 			},
-			'orm.entity' => function($container, $name) {
-				$schema = $container->get('orm.schema');
+			'base.orm.entity' => function($container, $name) {
+				$schema = $container->get('base.orm.schema');
 				return new \Base\ORM\Entity(
 					$name, 
 					$schema, 
-					$container->get('database',  $schema->get($name)['database']),
-					$container->get('orm.mapper', $name) 
+					$container->get('base.database',  $schema->get($name)['database']),
+					$container->get('base.orm.mapper', $name) 
 				);
 			},
-			'orm.mapper' => function($container, $name = null) {
-				$schema = $container->get('orm.schema');
+			'base.orm.mapper' => function($container, $name = null) {
+				$schema = $container->get('base.orm.schema');
 				return new \Base\ORM\Mapper(
 					$name, 
 					$schema, 
-					$container->get('database', $schema->get($name)['database']),
+					$container->get('base.database', $schema->get($name)['database']),
 					function($data = [], $prefix = '', $mapper = null, $columns = [], $relations = [], $methods = []){
 						return new \Base\ORM\Record($data, $prefix, $mapper, $columns, $relations, $methods);
 					},
 					function($name) use ($container){
-						return $container->get('orm.mapper', $name);
+						return $container->get('base.orm.mapper', $name);
 					}
 				);
 			},
-			'orm.schema' => function($container) {
+			'base.orm.schema' => function($container) {
 				return new \Base\ORM\Schema(
-					$container->get('loader')->finder(
-						$container->get('config')->get('schema.path')
+					$container->get('base.loader')->finder(
+						$container->get('base.config')->get(['schema','path'])
 					)
 				);
 			},
-			'profile' => function($container) {
+			'base.profile' => function($container) {
 				return new \Base\Profile(START);
 			},
-			'router' => function($container) {
+			'base.router' => function($container) {
 				return new \Base\Router(
-					$container->get('http.request')
+					$container->get('base.http.request')
 				);
 			},
-			'session' => function($container, $name) {
-				$config = $container->get('config')->get( ['session', $name] );
+			'base.session' => function($container, $name) {
+				$config = $container->get('base.config')->get( ['session', $name] );
 				switch ($name) {
 					case 'database':
 						$session = new $config['class'](
 							$config['params'],
-							$container->get('database', $config['database']),
-							$container->get('cookie'),
-							$container->get('encryption')
+							$container->get('base.database', $config['database']),
+							$container->get('base.cookie'),
+							$container->get('base.encryption')
 						);
 						break;
 					case 'native':
 						$session = new $config['class'](
 							$config['params'],
-							$container->get('cookie'),
-							$container->get('encryption')
+							$container->get('base.cookie'),
+							$container->get('base.encryption')
 						);
 						break;
 				}
 				return $session;
 			},
-			'validation' => function($container) {
+			'base.validation' => function($container) {
 				return new \Base\Validation();
 			},
-			'view' => function($container, $file = null, $data = []) {
+			'base.view' => function($container, $file = null, $data = []) {
 				if ($file === null) {
-					return $container->get('view.factory');
+					return $container->get('base.view.factory');
 				} else {
-					return $container->get('view.factory')->make($file, $data);
+					return $container->get('base.view.factory')->make($file, $data);
 				}
 			},
-			'view.factory' => function($container) {
-				$config = $container->get('config')->get('view');
+			'base.view.factory' => function($container) {
+				$config = $container->get('base.config')->get('view');
 				return new \Base\View(
-					$container->get('loader')->finder($config['path']), 
+					$container->get('base.loader')->finder($config['path']), 
 					new \Base\View\Part(null, null, null, null), 
 					$config['alias'], 
 					$container, 
 					'view.'
 				);
-			},
-			'view.url' => function($container) {
-				$router = $container->get('router');
-				return function($arg1 = null, $arg2 = null, $arg3 = null) use ($router) {
-					return $router->url($arg1, $arg2, $arg3);
-				};
 			},
 		]);
 	}

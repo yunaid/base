@@ -76,11 +76,11 @@ class Base
 		// get function from the router
 		// this function is defined with the route
 		// if there is no function defined, a controller will be used
-		$function = $this->container->get('router')->execute();
+		$function = $this->container->get('base.router')->execute();
 
 		// get request & response
-		$request = $this->container->get('http.request');
-		$response = $this->container->get('http.response');
+		$request = $this->container->get('base.http.request');
+		$response = $this->container->get('base.http.response');
 
 
 		if (is_object($function) && method_exists($function, '__invoke')) {
@@ -96,7 +96,7 @@ class Base
 			if (!$request->get('controller')) {
 				throw new ApplicationException('No controller set in request params');
 			}
-			$controller = $this->container->get('controller', $request->get('controller'));
+			$controller = $this->container->get('base.controller', $request->get('controller'));
 
 			// get action
 			if (!$request->get('action')) {
@@ -136,7 +136,7 @@ class Base
 	 */
 	public function respond()
 	{
-		$this->container->get('http.response')->send();
+		$this->container->get('base.http.response')->send();
 	}
 	
 	
@@ -146,8 +146,8 @@ class Base
 	 */
 	public function cli()
 	{
-		$cli = $this->container->get('cli');
-		$command = $this->container->get('command', $cli->command());
+		$cli = $this->container->get('base.cli');
+		$command = $this->container->get('base.command', $cli->command());
 		return $command($cli->params());
 	}
 
