@@ -19,7 +19,7 @@ class Base
 		}
 			
 		$container->share([
-			'cache',
+			'base.cache',
 			'cache.adapter',
 			'cli',
 			'config',
