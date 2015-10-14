@@ -6,7 +6,11 @@ class LogFileException extends \Exception{}
 
 class File
 {
-	// Log params
+	
+	/**
+	 * Params
+	 * @var array 
+	 */
 	protected $params = [
 		'path' => null
 	];

@@ -6,18 +6,40 @@ use \Base\Arr as Arr;
 
 class Request
 {
-	// globals
+	/**
+	 * contents of $_SERVER
+	 * @var array 
+	 */
 	protected $server = [];
-	protected $get = [];
-	protected $post = [];
 	
-	// parsed data
+	/**
+	 * Contents of $_GET
+	 * @var array 
+	 */
+	protected $get = [];
+	
+	/**
+	 * Contents of $_POST in arr
+	 * @var \Base\Arr 
+	 */
+	protected $post = null;
+	
+	/**
+	 * The parsed data from SERVER
+	 * @var type 
+	 */
 	protected $data = [];
 	
-	// headers
+	/**
+	 * Request headers
+	 * @var array 
+	 */
 	protected $headers = [];
 	
-	// The params after a request has been parsed by router
+	/**
+	 * The params after a request has been parsed by router
+	 * @var array 
+	 */
 	protected $params = [];
 
 	

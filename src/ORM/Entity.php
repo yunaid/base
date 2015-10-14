@@ -1,32 +1,7 @@
 <?php
-/*
-$entity = $this->storage('user')->entity();
-$entity->data(['title' => 'Test']);
-$entity->created = '2015-12-12';
 
-
-
-$entity->save();
-
-
-$entity = $this->storage('user')->load(12);
-
-if($entity->loaded()){
-	$entity->data(['title' => 'Test']);
-	
-	var_dump($entity->title);
-	var_dump($entity->original('title'));
-	var_dump($entity->data());
-	var_dump($entity->original());
-	$entity->save();
-}
-*/
 namespace Base\ORM;
 
-/**
- * Entity class
- * 
- */
 class Entity
 {
 	// the schema name

@@ -6,16 +6,29 @@ class ResponseException extends \Exception{}
 
 class Response
 {
-	// default status
+	/**
+	 * Status
+	 * @var int 
+	 */
 	protected $status = 200;
 	
-	// extra headers
+	/**
+	 * Headers to send
+	 * @var array 
+	 */
 	protected $headers = [];
 	
-	// response body
+	/**
+	 * The body to ouput
+	 * @var string 
+	 */
 	protected $body = '';
 	
-	// status messages
+	
+	/**
+	 * Status messages
+	 * @var array 
+	 */
 	protected $messages = array(
 		// Informational 1xx
 		100 => 'Continue',

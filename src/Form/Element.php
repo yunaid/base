@@ -4,13 +4,45 @@ namespace Base\Form;
 
 class Element
 {
+	/**
+	 * The id of the element
+	 * @var string 
+	 */
 	protected $key = null;
+	
+	/**
+	 * Element type (select / text / etc.)
+	 * @var string 
+	 */
 	protected $type = null;
+	
+	/**
+	 * Additional params
+	 * @var array 
+	 */
 	protected $params = [];
+	
+	/**
+	 * Reference to the parent form
+	 * @var \Base\Form 
+	 */
 	protected $form = null;
+	
+	/**
+	 * for multiple elements with the same name: the index
+	 * @var int 
+	 */
 	protected $index = 0;
 
-	public function __construct($key, $type, $params, $form)
+	
+	/**
+	 * Create an element
+	 * @param string $key
+	 * @param string $type
+	 * @param array $params
+	 * @param \Base\Form $form
+	 */
+	public function __construct($key, $type, array $params, \Base\Form $form)
 	{
 		$this->key = $key;
 		$this->type = $type;
@@ -19,17 +51,31 @@ class Element
 	}
 	
 	
+	/**
+	 * Set index for multiple elements with the samen name
+	 * @param int $index
+	 */
 	public function index($index)
 	{
 		$this->index = $index;
 	}
 	
+	
+	/**
+	 * Set value in form
+	 * @param string|int|array $value
+	 */
 	public function value($value)
 	{
 		$this->form->value($this->key, $value);
 	}
 	
 	
+	/**
+	 * Magic get
+	 * @param string $name
+	 * @return string|null
+	 */
 	public function __get($name)
 	{
 		switch($name){
@@ -83,6 +129,4 @@ class Element
 				}
 		}
 	}
-	
 }
-
