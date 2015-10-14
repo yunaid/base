@@ -6,10 +6,17 @@ class CacheFileException extends \Exception {};
 
 class File
 {
-	// spl file info cache dir
+	/**
+	 * Spl file info cache dir
+	 * @var \SplFileInfo 
+	 */
 	protected $dir = null;
 	
-	//contructor params
+	
+	/**
+	 * Params
+	 * @var array 
+	 */
 	protected $params = [
 		'path' => '___cache___',
 		'prefix' => ''

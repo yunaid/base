@@ -8,14 +8,24 @@ class DatabaseException extends \Exception{};
 
 class Connection
 {
-
-	// the default quote that should be used
+	/**
+	 * The default quote that should be used
+	 * @var string 
+	 */
 	protected $quote = '`';
 	
-	// The actual conneciton
+	
+	/**
+	 * The actual connection
+	 * @var \PDO 
+	 */
 	protected $connection = null;
 	
-	// connection params
+	
+	/**
+	 * Connection params
+	 * @var array 
+	 */
 	protected $params = [
 		'dsn' => '',
 		'username' => '',
@@ -24,7 +34,11 @@ class Connection
 		'profile' => false,
 	];
 	
-	// profile object
+	
+	/**
+	 * Profile objecy
+	 * @var \Base\Profile 
+	 */
 	protected $profile = null;
 
 
@@ -41,7 +55,7 @@ class Connection
 
 
 	/**
-	 * Connect to DB ans store connection
+	 * Connect to DB and store connection
 	 */
 	public function connect()
 	{

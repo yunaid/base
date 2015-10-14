@@ -9,28 +9,121 @@ class Query
 	// the connection
 	protected $connection = null;
 	
-	// 
+	/**
+	 * The quote string to use
+	 * @var string 
+	 */
 	protected $quote = null;
+	
+	/**
+	 * Query type, can be select, update, craete, delete, query
+	 * @var string 
+	 */
 	protected $type = null;
+	
+	/**
+	 * A raw query
+	 * @var string 
+	 */
 	protected $query = '';
+	
+	/**
+	 * The params the go with the raw params
+	 * @var array 
+	 */
 	protected $params = [];
+	
+	/**
+	 * Table name
+	 * @var string 
+	 */
 	protected $table = '';
+	
+	/**
+	 * Fields to select
+	 * @var array 
+	 */
 	protected $select = [];
+	
+	/**
+	 * Distrinct fields
+	 * @var boolean|array 
+	 */
 	protected $distinct = false;
+	
+	/**
+	 * Values to update
+	 * @var array 
+	 */
 	protected $values = [];
+	
+	/**
+	 * Joins
+	 * @var array 
+	 */
 	protected $joins = [];
+	
+	/**
+	 * Where clauses
+	 * @var array 
+	 */
 	protected $where = [];
+	
+	/**
+	 * Group statements
+	 * @var array 
+	 */
 	protected $group = [];
+	
+	/**
+	 * Having clauses
+	 * @var array 
+	 */
 	protected $having = [];
+	
+	/**
+	 * Limit
+	 * @var int|boolean 
+	 */
 	protected $limit = false;
+	
+	/**
+	 * Offset
+	 * @var int|boolean 
+	 */
 	protected $offset = false;
+	
+	/**
+	 * Order statements
+	 * @var array 
+	 */
 	protected $order = [];
+	
+	/**
+	 * union statements
+	 * @var array 
+	 */
 	protected $union = [];
+	
+	/**
+	 * Union all statments
+	 * @var array 
+	 */
 	protected $unionAll = [];
+	
+	/**
+	 * List of allowed operators
+	 * @var array 
+	 */
 	protected $operators = [
 		'=', '<', '>', '<=', '>=', '<>', '!=', 'LIKE', 'NOT LIKE', 'BETWEEN', 'ILIKE',
 		'&', '|', '^', '<<', '>>', 'RLIKE', 'REXEXP', 'NOT REGEXP', 'IN', 'ISNULL'
 	];
+	
+	/**
+	 * Var that holds the result after a call to execute
+	 * @var int|\PDOStatement 
+	 */
 	protected $result = null;
 
 	
@@ -143,9 +236,13 @@ class Query
 	 * @param string $table
 	 * @param string $type
 	 * @return \Base\Database\Query
+	 * @throws QueryException
 	 */
 	public function join($table, $type = 'INNER')
 	{
+		if ($this->type !== 'select') {
+			throw new QueryException('JOIN can only be used on a SELECT query');
+		}
 		$this->joins[] = [
 			'table' => $table,
 			'on' => [],
@@ -158,9 +255,9 @@ class Query
 
 	/**
 	 * Add on clause for active join
-	 * @param type $firstOrCallable
-	 * @param type $operatorOrSecond
-	 * @param type $second
+	 * @param string|\Closure $firstOrCallable
+	 * @param string $operatorOrSecond
+	 * @param string $second
 	 * @return \Base\Database\Query
 	 * @throws QueryException
 	 */
@@ -173,7 +270,15 @@ class Query
 		return $this;
 	}
 
-
+	
+	/**
+	 * Add an OR ON cluase
+	 * @param string|\Closure $firstOrCallable
+	 * @param string $operatorOrSecond
+	 * @param string $second
+	 * @return \Base\Database\Query
+	 * @throws QueryException
+	 */
 	public function orOn($firstOrCallable, $operatorOrSecond = null, $second = null)
 	{
 		if (count($this->joins) == 0) {
@@ -184,6 +289,14 @@ class Query
 	}
 
 
+	/**
+	 * Add an ON clause not directly related to column matching
+	 * @param string|\Closure $firstOrCallable
+	 * @param string $operatorOrSecond
+	 * @param string $second
+	 * @return \Base\Database\Query
+	 * @throws QueryException
+	 */
 	public function onWhere($firstOrCallable, $operatorOrSecond = null, $second = null)
 	{
 		if (count($this->joins) == 0) {
@@ -193,7 +306,15 @@ class Query
 		return $this;
 	}
 
-
+	
+	/**
+	 * Add an OR ON clause not directly related to column matching
+	 * @param string|\Closure $firstOrCallable
+	 * @param string $operatorOrSecond
+	 * @param string $second
+	 * @return \Base\Database\Query
+	 * @throws QueryException
+	 */
 	public function orOnWhere($firstOrCallable, $operatorOrSecond = null, $second = null)
 	{
 		if (count($this->joins) == 0) {
@@ -204,13 +325,29 @@ class Query
 	}
 
 
+	/**
+	 * Add a WHERE clause. When used more than once, will use AND as logic
+	 * @param string|\Closure $firstOrCallable
+	 * @param string $operatorOrSecond
+	 * @param string $second
+	 * @return \Base\Database\Query
+	 * @throws QueryException
+	 */
 	public function where($firstOrCallable, $operatorOrSecond = null, $second = null)
 	{
 		$this->condition('AND', $this->where, $firstOrCallable, $operatorOrSecond, $second);
 		return $this;
 	}
 
-
+	
+	/**
+	 * Add an OR clause.  When used more than once, will use OR as logic
+	 * @param string|\Closure $firstOrCallable
+	 * @param string $operatorOrSecond
+	 * @param string $second
+	 * @return \Base\Database\Query
+	 * @throws QueryException
+	 */
 	public function orWhere($firstOrCallable, $operatorOrSecond = null, $second = null)
 	{
 		$this->condition('OR', $this->where, $firstOrCallable, $operatorOrSecond, $second);
@@ -218,6 +355,11 @@ class Query
 	}
 
 
+	/**
+	 * Add a GROUP BY statement
+	 * @param string|array $group
+	 * @return \Base\Database\Query
+	 */
 	public function group($group)
 	{
 		if (is_array($group)) {
@@ -229,20 +371,39 @@ class Query
 	}
 
 
+	/**
+	 * Add a HAVING clause. multiple HAVING clauses will be bomined with AND
+	 * @param string|\Closure $firstOrCallable
+	 * @param string $operatorOrSecond
+	 * @param string $second
+	 * @return \Base\Database\Query
+	 */
 	public function having($firstOrCallable, $operatorOrSecond = null, $second = null)
 	{
 		$this->condition('AND', $this->having, $firstOrCallable, $operatorOrSecond, $second);
 		return $this;
 	}
 
-
+	
+	/**
+	 * Add a HAVING clause. multiple HAVING clauses will be bomined with OR
+	 * @param string|\Closure $firstOrCallable
+	 * @param string $operatorOrSecond
+	 * @param string $second
+	 * @return \Base\Database\Query
+	 */
 	public function orHaving($firstOrCallable, $operatorOrSecond = null, $second = null)
 	{
 		$this->condition('OR', $this->having, $firstOrCallable, $operatorOrSecond, $second);
 		return $this;
 	}
 
-
+	
+	/**
+	 * Add a LIMIT statement
+	 * @param int $limit
+	 * @return \Base\Database\Query
+	 */
 	public function limit($limit)
 	{
 		$this->limit = $limit;
@@ -250,6 +411,11 @@ class Query
 	}
 
 
+	/**
+	 * Add an OFFSET statement
+	 * @param int $offset
+	 * @return \Base\Database\Query
+	 */
 	public function offset($offset)
 	{
 		$this->offset = $offset;
@@ -257,6 +423,12 @@ class Query
 	}
 
 
+	/**
+	 * Add ORDER BY statements
+	 * @param string|array $columnOrOrders
+	 * @param string $direction
+	 * @return \Base\Database\Query
+	 */
 	public function order($columnOrOrders, $direction = 'ASC')
 	{
 		if (is_array($columnOrOrders)) {
@@ -268,6 +440,11 @@ class Query
 	}
 
 
+	/**
+	 * Add a UNION statement
+	 * @param \Base\Database\Query $query
+	 * @return \Base\Database\Query
+	 */
 	public function union($query)
 	{
 		$this->union [] = $query;
@@ -275,6 +452,11 @@ class Query
 	}
 
 
+	/**
+	 * Add a UNION ALL statement
+	 * @param \Base\Database\Query $query
+	 * @return \Base\Database\Query
+	 */
 	public function unionAll($query)
 	{
 		$this->unionAll [] = $query;
@@ -282,6 +464,14 @@ class Query
 	}
 
 
+	/**
+	 * Add a condition
+	 * @param string $logic
+	 * @param array $stack
+	 * @param string|\Closure $firstOrCallable
+	 * @param string $operatorOrSecond
+	 * @param string $second
+	 */
 	protected function condition($logic, & $stack, $firstOrCallable, $operatorOrSecond = null, $second = null)
 	{
 		if (is_object($firstOrCallable) && is_callable($firstOrCallable, '__invoke')) {
@@ -313,6 +503,13 @@ class Query
 	}
 
 
+	/**
+	 * Compile the query
+	 * Return an array with 
+	 * - the query as a string with placeholders as first element
+	 * - The parameters as array in the second argument
+	 * @return array
+	 */
 	public function compile()
 	{
 		switch ($this->type) {
@@ -329,7 +526,11 @@ class Query
 		}
 	}
 
-
+	
+	/**
+	 * Comile an insert query
+	 * @return array
+	 */
 	protected function compileInsert()
 	{
 		$params = [];
@@ -360,7 +561,11 @@ class Query
 		return [$query, $params];
 	}
 
-
+	
+	/**
+	 * Compile a select query
+	 * @return array
+	 */
 	protected function compileSelect()
 	{
 		$params = [];
@@ -528,6 +733,10 @@ class Query
 	}
 
 
+	/**
+	 * Compile an update query
+	 * @return array
+	 */
 	protected function compileUpdate()
 	{
 		$params = [];
@@ -558,6 +767,10 @@ class Query
 	}
 
 
+	/**
+	 * Compile a delete query
+	 * @return array
+	 */
 	protected function compileDelete()
 	{
 		$query = 'DELETE FROM ';
@@ -572,7 +785,13 @@ class Query
 	}
 
 
-	protected function compileConditions($conditions, $asOn = false)
+	/**
+	 * Compile a set of conditions
+	 * @param array $conditions
+	 * @param boolean $asOn
+	 * @return array
+	 */
+	protected function compileConditions(array $conditions, $asOn = false)
 	{
 		$query = '';
 		$params = [];
@@ -632,13 +851,26 @@ class Query
 		return [$query, $params];
 	}
 
-
+	/**
+	 * Quote a tablename
+	 * replace a quote character in the tablename with a double quote character
+	 * FI: "table`name" becomes "`table``name`"
+	 * @param string $table
+	 * @return string
+	 */
 	protected function quoteTable($table)
 	{
 		return $this->quote . str_replace($this->quote, $this->quote . $this->quote, $table) . $this->quote;
 	}
 
 
+	/**
+	 * Quote an identifier
+	 * quote dotted identifiers and quote quotes
+	 * "table.col`umn" becomnes "`table`.`col``umn`"
+	 * @param string $identifier
+	 * @return string
+	 */
 	protected function quoteIdentifier($identifier)
 	{
 		$parts = explode('.', $identifier);
@@ -650,6 +882,16 @@ class Query
 	}
 
 
+	/**
+	 * Execute the query
+	 * With insert queries, pass in the names of the id-field, to get the last-inserted id
+	 * The result is either:
+	 * - last inserted id for INSERT
+	 * - affected rows for UPDATE / DELETE
+	 * - resultset for SELECT
+	 * @param string $id
+	 * @return \Base\Database\Query
+	 */
 	public function execute($id = 'id')
 	{
 		list($query, $params) = $this->compile();
@@ -658,6 +900,31 @@ class Query
 	}
 
 
+	/**
+	  * Execute the query and get the results immediatly
+	 *  With insert queries, pass in the names of the id-field as $primaryOrKey, to get the last-inserted value of that field
+	 *  With select queries, pass in a $key and/or a $val to get the following
+	 * 
+	 * result();
+	 * [row, row, ...]
+	 * 
+	 * result('title');
+	 * ['title' => row, 'title' => row, ...]
+	 * 
+	 * result('title', 'description')
+	 * ['title' => 'description', 'title' => 'description', ...]
+	 * 
+	 *  The result is either:
+	 * - last inserted id for INSERT
+	 * - number of affected rows for UPDATE / DELETE
+	 * - resultsset for SELECT
+	 * 
+	 * To get the raw itereator use ::iterator
+	 * 
+	 * @param string $primaryOrKey
+	 * @param string $val
+	 * @return int|array
+	 */
 	public function result($primaryOrKey = null, $val = null)
 	{
 		if ($this->result === null) {
@@ -689,6 +956,10 @@ class Query
 	}
 
 
+	/**
+	 * Get the raw PDO iterator for a SELECT
+	 * @return \PDOStatement
+	 */
 	public function iterator()
 	{
 		if ($this->result === null) {

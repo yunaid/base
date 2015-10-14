@@ -4,10 +4,16 @@ namespace Base\Exception;
 
 class Handler
 {
-	// callable that is called when handling
+	/**
+	 * Callable that is called when handling
+	 * @var Callable 
+	 */
 	protected $callback = null;
 	
-	// whether we are already handling an exceoption (to prevent endless exception handling)
+	/**
+	 * Whether we are already handling an exception (to prevent endless exception handling)
+	 * @var boolean 
+	 */
 	protected $handling = false;
 
 	
@@ -71,7 +77,6 @@ class Handler
 		} else {
 			// something went sour. Stop right here.
 			echo '<!-- Error handling exception: ';
-			var_dump($exception);
 			echo $exception->getMessage();
 			echo ' -->';
 			exit(1);

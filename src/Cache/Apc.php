@@ -4,11 +4,15 @@ namespace Base\Cache;
 
 class APC
 {
-	// constructor params
+	/**
+	 * Params
+	 * @var array 
+	 */
 	protected $params = [
 		'prefix' => ''
 	];
 
+	
 	/**
 	 * Constructor
 	 * @param array $params
