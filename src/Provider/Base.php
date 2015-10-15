@@ -36,7 +36,7 @@ class Base
 			'base.profile',
 			'base.router',
 			'base.session',
-			'base.view.factory',
+			'base.view.engine',
 		])->group([
 			'base.cache' => key($config['cache']),
 			'base.cache.adapter' => key($config['cache.adapter']),
@@ -212,6 +212,28 @@ class Base
 			'base.validation' => function($container) {
 				return new \Base\Validation();
 			},
+				
+				
+			'base.view' => function($container, $file, $data = []) {
+				return new \Base\View(
+					$container->get('base.view.engine'),
+					$file,
+					$data
+				);
+			},
+			'base.view.engine' => function($container) {
+				$config = $container->get('base.config')->get('view');
+				return \Base\View\Engine::instance(
+					$container->get('base.loader')->finder($config['path']),
+					function($file, $data = []) use ($container) {
+						return $container->get('base.view', $file, $data);
+					},
+					'view',
+					'fetch',
+					'view.'
+				);
+			},	
+			/*
 			'base.view' => function($container, $file = null, $data = []) {
 				if ($file === null) {
 					return $container->get('base.view.factory');
@@ -229,6 +251,8 @@ class Base
 					'view.'
 				);
 			},
+			 * 
+			 */
 		]);
 	}
 }

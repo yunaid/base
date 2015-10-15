@@ -5,24 +5,45 @@ class ContainerException extends \Exception{};
 
 class Container
 {
-	
-	// The definitions stored via set
-	// defitions are stored in an array
-	// with multiple calls to set, there can be multiple definitions (parents)
+	/**
+	 * The definitions stored via set
+	 * Defitions are stored as ['name' => [definition]]
+	 * With multiple calls to set, there can be multiple definitions for one name
+	 * These can be used as parents
+	 * @var array 
+	 */
 	protected $definitions = [];
 	
-	// Definitions marked as shared
+	/**
+	 * Aliases for long names
+	 * Aliases will take precedence over actual definitions
+	 * @var array 
+	 */
+	protected $aliases = [];
+			
+	/**
+	 * Definitions marked as shared
+	 * @var array 
+	 */
 	protected $shared = [];
 	
-	// Definitions marked as grouped
+	/**
+	 * Definitions marked as grouped
+	 * @var array 
+	 */
 	protected $grouped = [];
 	
-	// Created instances
+	/**
+	 * Created instances
+	 * @var array 
+	 */
 	protected $instances = [];
 	
-	// Definitions that are resolving
-	// will hold the remaining parents of a definition so they can be used
-	// by a call to parent()
+	/**
+	 * Definitions that are resolving
+	 * Will hold the remaining parents of a definition so they can be used by a call to parent()
+	 * @var array 
+	 */
 	protected $resolving = [];
 	
 	
@@ -63,10 +84,28 @@ class Container
 
 	
 	/**
-	 * Set definition and mark as shared
-	 * or mark multiple definitions as shared
-	 * @param array | string $nameOrNames
-	 * @param Mixed $definition
+	 * Set alias for a definition or multiple definitions at once
+	 * @param string|array $aliasOrAliases
+	 * @param string $name
+	 * @return \Base\Container
+	 */
+	public function alias($aliasOrAliases, $name = null)
+	{
+		if (is_array($aliasOrAliases)) {
+			// set aliases
+			$this->aliases = array_merge($this->aliases, $aliasOrAliases);
+		} else {
+			$this->aliases[$aliasOrAliases] = $name;
+		}
+		return $this;
+	}
+	
+	
+	/**
+	 * Set definition and mark as as shared
+	 * Or mark definitions as shared
+	 * @param string|array $nameOrNames
+	 * @param mixed $definition
 	 * @return \Base\Container
 	 */
 	public function share($nameOrNames, $definition = null)
@@ -113,8 +152,9 @@ class Container
 	{
 		$args = func_get_args();
 		$name = array_shift($args);
-		
-
+		if(isset($this->aliases[$name])) {
+			$name = $this->aliases[$name];
+		}
 		if (isset($this->definitions[$name])) {
 			if(isset($this->grouped[$name])){
 				$args[0] = isset($args[0]) ? $args[0] : $this->grouped[$name];
@@ -141,6 +181,9 @@ class Container
 	{
 		$args = func_get_args();
 		$name = array_shift($args);
+		if(isset($this->aliases[$name])) {
+			$name = $this->aliases[$name];
+		}
 		if (isset($this->definitions[$name])) {
 			if(isset($this->grouped[$name])){
 				$args[0] = isset($args[0]) ? $args[0] : $this->grouped[$name];
@@ -165,6 +208,9 @@ class Container
 	{
 		$args = func_get_args();
 		$name = array_shift($args);
+		if(isset($this->aliases[$name])) {
+			$name = $this->aliases[$name];
+		}
 		if (isset($this->resolving[$name]) && ! empty($this->resolving[$name])) {
 			// get the parents of the last resolving name
 			$parents = array_pop($this->resolving[$name]);
