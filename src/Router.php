@@ -78,6 +78,9 @@ class Router
 	 *	'parse': a closure that will be run after an uri is matched. $params and $request are arguments. Return false move on to next route
 	 *  'build': a closure that will be run before an uri is built from params. $params is the argument
 	 * 
+	 * $function is a callback funtion that is provided with a request and response. 
+	 * If not $function is provided, a controller/action combination is used, based on  'controller' and 'action' params
+	 * 
 	 * @param string $name
 	 * @param string $pattern
 	 * @param array $options

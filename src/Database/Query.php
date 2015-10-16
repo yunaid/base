@@ -198,6 +198,7 @@ class Query
 		return $this;
 	}
 
+	
 	/**
 	 * Add distinct columns
 	 * @param string|array $distinct
@@ -221,7 +222,7 @@ class Query
 		return $this;
 	}
 
-
+	
 	/**
 	 * Set values for update (alias for :: values)
 	 * @param string|array $columnOrValues
@@ -564,20 +565,20 @@ class Query
 			$separator = ', ';
 		}
 
-		$query .= ') VALUES ( ';
+		$query .= ') VALUES (';
 
 		$separator = '';
 		foreach ($this->values as $identifier => $value) {
 			if ($value instanceof \Base\Database\Raw) {
-				$query .= $separator . $value->expression() . ' ';
+				$query .= $separator . $value->expression();
 			} else {
 				$params [] = $value;
-				$query .= $separator . '? ';
+				$query .= $separator . '?';
 			}
 			$separator = ', ';
 		}
 
-		$query .= ') ';
+		$query .= ')';
 
 		return [$query, $params];
 	}
@@ -795,11 +796,11 @@ class Query
 	protected function compileDelete()
 	{
 		$query = 'DELETE FROM ';
-		$query .= $this->quoteTable($this->table) . ' ';
+		$query .= $this->quoteTable($this->table);
 		$params = [];
 		if (count($this->where) > 0) {
 			list($whereQuery, $whereParams) = $this->compileConditions($this->where);
-			$query.= 'WHERE ' . $whereQuery;
+			$query.= ' WHERE ' . $whereQuery;
 			$params = array_merge($params, $whereParams);
 		}
 		return [$query, $params];
@@ -827,7 +828,7 @@ class Query
 			$omitLogic = false;
 
 			if ($condition['type'] === 'group_open') {
-				$query .= '( ';
+				$query .= '(';
 				$omitLogic = true;
 			} elseif ($condition['type'] === 'group_close') {
 				$query .= ') ';

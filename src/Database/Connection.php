@@ -47,7 +47,7 @@ class Connection
 	 * @param array $params
 	 * @param \Base\Profile $profile
 	 */
-	public function __construct(array $params, Profile $profile = null)
+	public function __construct(array $params = [], Profile $profile = null)
 	{
 		$this->params = array_merge($this->params, $params);
 		$this->profile = $profile;
