@@ -6,6 +6,16 @@ class ViewEngineException extends \Exception{}
 
 class Engine
 {
+	protected static $engine = null;
+
+	protected static $class = 'Engine';
+	
+	protected static $engineClass = 'Engine';
+	
+	protected static $fetchClass = 'Fetch';
+	
+	
+	
 	
 	/**
 	 * File finder
@@ -19,15 +29,28 @@ class Engine
 	 */
 	protected $viewFactory;
 	
-
-	public function __construct($finder, $viewFactory, $viewAlias = 'view', $fetchAlias = 'fetch')
+	
+	
+	public function instance($finder, $viewFactory, $viewAlias = 'view', $fetchAlias = 'fetch')
+	{
+		if(static::$engine === null) {
+			static::$engine = new self($finder, $viewFactory, $viewAlias, $fetchAlias);
+		}
+		return $engine;
+	}
+	
+	
+	protected function __construct($finder, $viewFactory, $viewAlias, $fetchAlias)
 	{
 		$this->finder = $finder;
 		$this->viewFactory = $viewFactory;
 		
 		// set view and fetch aliases
-		class_alias('\\Base\\View\\View', $viewAlias);
+		class_alias('\\Base\\View\\Engine', $viewAlias);
 		class_alias('\\Base\\View\\Fetch', $fetchAlias);
+		
+		// set the engine in the static class
+		\Base\View\View::engine($this);
 	}
 	
 	
@@ -66,7 +89,6 @@ class Engine
 	}
 	
 
-		
 	protected function capture($__file__, $__data__)
 	{
 		// set view alias, but only once
@@ -110,6 +132,7 @@ class Engine
 		// return the bufered result
 		return $html;
 	}
+
 	
 	
 }
@@ -315,10 +338,7 @@ class __View
 
 }
 
-class Fetch extends View
+class Fetch extends Engine
 {
-
-	// class name
-	protected static $className = 'Fetch';
-
+	protected static $class = 'Fetch';
 }

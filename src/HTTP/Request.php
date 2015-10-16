@@ -104,7 +104,10 @@ class Request
 		$data['agent'] = $this->server['HTTP_USER_AGENT'];
 
 		// compose base url
-		$base = $data['protocol'] . '://' . $data['domain'] . ($data['port'] != '80' ? ':' . $data['port'] : '') . '/' . ($data['path'] === '/' ? '' : $data['path']);
+		$base = $data['protocol'] . '://' . 
+		$data['domain'] . 
+		( ($data['port'] === '80' && $data['protocol'] === 'http') || ($data['port'] === '443' && $data['protocol'] === 'https') ? '' : ':' . $data['port'] ) . 
+		'/' . ($data['path'] === '/' ? '' : $data['path']);
 		$data['base'] = rtrim($base, '/') . '/';
 
 		// save

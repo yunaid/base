@@ -8,32 +8,55 @@ class RouterException extends \Exception{}
 
 class Router
 {
-
-	// Request object
+	/**
+	 * Request object
+	 * @var \Base\HTTP\Request 
+	 */
 	protected $request = null;
 	
-	// Mapped routes
+	/**
+	 * Mapped routes
+	 * @var array 
+	 */
 	protected $routes = [];
 	
-	// Default route to use
+	/**
+	 * Default route to use
+	 * @var type 
+	 */
 	protected $route = null;
 	
-	// Parser callables
+	/**
+	 * Parser callables
+	 * @var array 
+	 */
 	protected $parse = [];
 	
-	// Builder callables
+	/**
+	 * Builder callables
+	 * @var array 
+	 */
 	protected $build = [];
 	
-	// Extracted params
+	/**
+	 * Extracted params from a matching uri after parsing
+	 * @var array 
+	 */
 	protected $params = [];
 	
-	// Retain in uri
+	/**
+	 * Params to retain from current request into uri
+	 * @var array 
+	 */
 	protected $retain = [];
 	
-	// cached compiled uris
+	/**
+	 * Cached compiled uris with placeholders for params
+	 * @var array 
+	 */
 	protected $compiled = [];
 
-
+	
 	/**
 	 * Cosntructor
 	 * @param \Base\HTTP\Request $request
@@ -46,6 +69,15 @@ class Router
 
 	/**
 	 * Add a route or set the default route
+	 * 
+	 * $name can be used to target a specific route when buildign an url
+	 * $patter is the pattern to match
+	 * $options can container the following
+	 *	'conditions': an array with regexes for params in the uri
+	 *	'defaults': an array with default values for missing optional params in the uri
+	 *	'parse': a closure that will be run after an uri is matched. $params and $request are arguments. Return false move on to next route
+	 *  'build': a closure that will be run before an uri is built from params. $params is the argument
+	 * 
 	 * @param string $name
 	 * @param string $pattern
 	 * @param array $options
@@ -61,12 +93,12 @@ class Router
 			// add/replace the route
 			$this->routes[$name] = array_merge(
 				[
-				'pattern' => $pattern,
-				'function' => $function,
-				'conditions' => [],
-				'defaults' => [],
-				'parse' => null,
-				'build' => null,
+					'pattern' => $pattern,
+					'function' => $function,
+					'conditions' => [],
+					'defaults' => [],
+					'parse' => null,
+					'build' => null,
 				], $options
 			);
 		}
@@ -251,7 +283,7 @@ class Router
 		}
 
 		// call route builders on params
-		if ($this->routes[$route]['build'] !== null) {
+		if (is_object($this->routes[$route]['build']) && method_exists($this->routes[$route]['build'], '__invoke')) {
 			$params = $this->routes[$route]['build']($params);
 		}
 
@@ -286,6 +318,9 @@ class Router
 		$key = $pattern . '|' . implode('|', array_keys(array_filter($params)));
 
 		if (!isset($this->compiled[$key])) {
+			// replace all params :name in the pattern with {{name}} tokens
+			// Do this only if the param is given in params
+			// If not, place a {{!}} token
 			while (preg_match('#:(\w+)#', $pattern, $match)) {
 				list($group, $param) = $match;
 				if (isset($params[$param]) && $params[$param] !== '') {
@@ -313,6 +348,7 @@ class Router
 			}
 
 			// there is still an unavailable param in the compiled uri
+			// This means the param was not optional, but also not available
 			if (strpos($pattern, '{{!}}') !== false) {
 				throw new RouterException('Missing param in compiled uri: ' . $pattern);
 			}
@@ -323,7 +359,9 @@ class Router
 			$this->compiled[$key] = $pattern;
 		}
 
+		// We have a colpiled pattern with {{param}} tokens now.
 		// replace all the tokens with actual params
+		// TODO: optimize this
 		$uri = $this->compiled[$key];
 		foreach ($params as $key => $value) {
 			$uri = str_replace('{{' . $key . '}}', $value, $uri);
