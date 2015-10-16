@@ -47,9 +47,9 @@ class Query
 	
 	/**
 	 * Distrinct fields
-	 * @var boolean|array 
+	 * @var array 
 	 */
-	protected $distinct = false;
+	protected $distinct = [];
 	
 	/**
 	 * Values to update
@@ -116,8 +116,29 @@ class Query
 	 * @var array 
 	 */
 	protected $operators = [
-		'=', '<', '>', '<=', '>=', '<>', '!=', 'LIKE', 'NOT LIKE', 'BETWEEN', 'ILIKE',
-		'&', '|', '^', '<<', '>>', 'RLIKE', 'REXEXP', 'NOT REGEXP', 'IN', 'ISNULL'
+		'=', 
+		'<', 
+		'>', 
+		'<=', 
+		'>=', 
+		'<>', 
+		'!=', 
+		'&',
+		'|', 
+		'^', 
+		'<<', 
+		'>>',
+		'LIKE', 
+		'NOT LIKE', 
+		'BETWEEN', 
+		'NOT BETWEEN', 
+		'ILIKE', 
+		'RLIKE',
+		'REXEXP', 
+		'NOT REGEXP', 
+		'IN', 
+		'ISNULL', 
+		'SOUNDS LIKE',
 	];
 	
 	/**
@@ -178,13 +199,13 @@ class Query
 	}
 
 	/**
-	 * Add distinct clause
-	 * @param string|boolean $distinct
+	 * Add distinct columns
+	 * @param string|array $distinct
 	 * @return \Base\Database\Query
 	 */
-	public function distinct($distinct = true)
+	public function distinct($columnOrColumns)
 	{
-		$this->distinct = $distinct;
+		$this->distinct = array_merge($this->distinct, (array) $columnOrColumns);
 		return $this;
 	}
 
@@ -574,8 +595,8 @@ class Query
 		$query = 'SELECT ';
 
 		//distinct
-		if ($this->distinct === true) {
-			$query.= 'DISTINCT ';
+		if (count($this->distinct) > 0) {
+			$query.= 'DISTINCT '.implode(', '.$this->distinct).', ';
 		}
 
 		// values
@@ -829,7 +850,7 @@ class Query
 						$query .= $condition['operator'] . ' ';
 						$query.= '(' . $subQuery . ') ';
 					} elseif (is_array($condition['second'])) {
-						if ($condition['operator'] === 'BETWEEN') {
+						if ($condition['operator'] === 'BETWEEN' || $condition['operator'] === 'NOT BETWEEN') {
 							list($min, $max) = $condition['second'];
 							$params[] = $min;
 							$params[] = $max;
