@@ -2,6 +2,8 @@
 
 namespace Base;
 
+use \Base\View\Engine as Engine;
+
 class View
 {
 	/**
@@ -43,13 +45,13 @@ class View
 	
 	/**
 	 * New View
+	 * @param \Base\View\Engine $engine
 	 * @param string $file
 	 * @param array $data
-	 * @param \Base\View\Engine $engine
 	 */
-	public function __construct(\Base\View\Engine $engine, $file, array $data = [])
+	public function __construct(Engine $engine, $file, array $data = [])
 	{
-		// generate unique id
+		// generate and assign unique id
 		static::$uid++;
 		$this->id = static::$uid;
 		
@@ -110,12 +112,12 @@ class View
 	
 	
 	/**
-	 * Render this view
+	 * Let the engine render this view
 	 * @return string
 	 */
 	public function render()
 	{
-		return $this->engine->render($this);
+		return $this->engine->render($this->id, $this->file, $this->data, $this->blocks);
 	}
 
 	
@@ -138,16 +140,6 @@ class View
 		return $this->id;
 	}
 
-	
-	/**
-	 * Get file, used by engine
-	 * @return string
-	 */
-	public function file()
-	{
-		return $this->file;
-	}
-	
 	
 	/**
 	 * Get data, used by engine

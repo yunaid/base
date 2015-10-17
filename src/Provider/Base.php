@@ -212,47 +212,26 @@ class Base
 			'base.validation' => function($container) {
 				return new \Base\Validation();
 			},
-				
-				
-			'base.view' => function($container, $file, $data = []) {
-				return new \Base\View(
-					$container->get('base.view.engine'),
-					$file,
-					$data
-				);
+			'base.view' => function($container, $file = null, $data = []) {
+				if($file === null) {
+					return $container->get('base.view.engine');
+				} else {
+					return $container->get('base.view.engine')->make($file, $data);
+				}
 			},
 			'base.view.engine' => function($container) {
 				$config = $container->get('base.config')->get('view');
 				return \Base\View\Engine::instance(
 					$container->get('base.loader')->finder($config['path']),
-					function($file, $data = []) use ($container) {
-						return $container->get('base.view', $file, $data);
+					function($engine, $file, $data = []) {
+						return new \Base\View($engine, $file, $data);
 					},
+					$container,
 					'view',
 					'fetch',
 					'view.'
 				);
-			},	
-			/*
-			'base.view' => function($container, $file = null, $data = []) {
-				if ($file === null) {
-					return $container->get('base.view.factory');
-				} else {
-					return $container->get('base.view.factory')->make($file, $data);
-				}
 			},
-			'base.view.factory' => function($container) {
-				$config = $container->get('base.config')->get('view');
-				return new \Base\View(
-					$container->get('base.loader')->finder($config['path']), 
-					new \Base\View\Part(null, null, null, null), 
-					$config['alias'], 
-					$container, 
-					'view.'
-				);
-			},
-			 * 
-			 */
 		]);
 	}
 }
