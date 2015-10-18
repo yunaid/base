@@ -226,10 +226,7 @@ class Base
 					function($engine, $file, $data = []) {
 						return new \Base\View($engine, $file, $data);
 					},
-					$container,
-					'view',
-					'fetch',
-					'view.'
+					$config['alias']
 				);
 			},
 		]);

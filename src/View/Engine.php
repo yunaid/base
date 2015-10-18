@@ -2,6 +2,8 @@
 
 namespace Base\View;
 
+class ViewEngineException extends \Exception {}
+
 class Engine
 {
 	
@@ -35,13 +37,7 @@ class Engine
 	 */
 	protected static $finder = null;
 
-	
-	/**
-	 * Container to load helpers
-	 * @var \Base\Container 
-	 */
-	protected static $container = null;
-	
+
 	/**
 	 * Prefix when fetching from container
 	 * @var string 
@@ -49,7 +45,7 @@ class Engine
 	protected static $prefix = 'view.';
 	
 	/**
-	 * registered and found helpers
+	 * registered helpers
 	 * @var array 
 	 */
 	protected static $helpers = [];
@@ -95,16 +91,13 @@ class Engine
 	 * Create a single instance of the engine
 	 * @param \Closure $finder
 	 * @param \Closure $factory
-	 * @param \Base\Container $container
-	 * @param string $view
-	 * @param string $fetch
-	 * @param string $prefix
+	 * @param array $alias
 	 * @return \Base\View\Engine
 	 */
-	public static function instance($finder, $factory, $container = null, $view = 'view', $fetch = 'fetch', $prefix = 'view.')
+	public static function instance(\Closure $finder, \Closure $factory, array $alias = ['view' => 'view', 'fetch' => 'fetch'])
 	{
 		if(static::$engine === null) {
-			static::$engine = new self($finder, $factory, $container, $view, $fetch, $prefix);
+			static::$engine = new self($finder, $factory, $alias);
 		}
 		return static::$engine;
 	}
@@ -154,6 +147,27 @@ class Engine
 	}
 	
 	
+	/**
+	 * View the info about the current render-status
+	 * @return array
+	 */
+	public static function info()
+	{
+		$view = static::$map[static::$rendering]['view'];
+		$info = [
+			'file' => $view->file(),
+			'data' => $view->data(),
+			'shared' => static::$shared,
+		];
+		
+		if (static::$alias === static::$fetch) {
+			return $info;
+		} else {
+			var_export($info);
+		}
+	}
+	
+
 	/**
 	 * Extend a different view file
 	 * @param string $file
@@ -244,7 +258,7 @@ class Engine
 	 * Add asset to specific asset group
 	 * @param string $group
 	 * @param string $html
-	 * @param bool $duplicate push to assets regardless of element existing
+	 * @param boolen $duplicate push to assets regardless of element existing
 	 */
 	public static function asset($group, $html = '', $duplicate = false)
 	{
@@ -331,9 +345,11 @@ class Engine
 	 * @param string $name
 	 * @return mixed
 	 */
-	public static function shared($name)
+	public static function shared($name = null)
 	{
-		if (isset(static::$shared[$name])) {
+		if($name === null) {
+			return static::$shared;
+		} elseif (isset(static::$shared[$name])) {
 			if (static::$alias === static::$fetch) {
 				return static::$shared[$name];
 			} else {
@@ -344,31 +360,7 @@ class Engine
 		}
 	}
 
-	
-	/**
-	 * Get something from the container
-	 * @return mixed
-	 */
-	public static function get()
-	{
-		if (static::$container !== null) {
-			$arg = func_get_args();
-			$name = array_shift($arg);
-			if (count($arg) === 1) {
-				$arg = $arg[0];
-			}
-			$result = static::$container->get($name, $arg);
-			if (!is_scalar($result) || static::$className === static::$fetchClass) {
-				return $result;
-			} else {
-				echo $result;
-			}
-		} else {
-			return null;
-		}
-	}
 
-	
 	/**
 	 * Use a helper
 	 * @param string $name
@@ -377,14 +369,32 @@ class Engine
 	 */
 	public static function __callStatic($name, array $args)
 	{
-		if (!isset(static::$helpers[$name]) && static::$container !== null) {
-			// helper not set, but container is present. Get helper from under the helper key
-			static::$helpers[$name] = static::$container->get(static::$prefix . $name);
-		}
-
 		if (isset(static::$helpers[$name])) {
+			
+			// get the helper-wrapper
 			$helper = static::$helpers[$name];
+			
+			// Some helpers are registered as closures, some as a different type
+			// To make sure the closures have run, 
+			// wrap the helper in a ['__helper__' => $helper] after evaluating
+			if(!is_array($helper) || !isset($helper['__helper__'])){
+				// helper has not been evaluated yet
+				if (is_object($helper) && method_exists($helper, '__invoke')) {
+					// helper registered as closure (lazy load)
+					$helper = ['__helper__' => $helper->__invoke()];
+				} else {
+					// helper registered as value
+					$helper = ['__helper__' => $helper];
+				}
+				static::$helpers[$name] = $helper;
+			}
+			
+			// get the actual helper
+			$helper = $helper['__helper__'];
+			
+			// use the helper
 			if (is_object($helper) && method_exists($helper, '__invoke')) {
+				// helper is a closue: call it and return the result
 				switch (count($args)) {
 					case 0:
 						$result = $helper();
@@ -401,7 +411,6 @@ class Engine
 					default:
 						$result = call_user_func_array($helper, $args);
 				}
-				// helper is a closue: call it and return the result
 				if (static::$alias === static::$fetch || !is_scalar($result)) {
 					return $result;
 				} else {
@@ -423,8 +432,6 @@ class Engine
 		}
 	}
 	
-	
-
 
 	
 	/* ------------------------------
@@ -441,23 +448,52 @@ class Engine
 	 * Protected Constructor
 	 * @param \Closure $finder
 	 * @param \Closure $factory
-	 * @param \Base\Container $container
-	 * @param string $view
-	 * @param string $fetch
-	 * @param string $prefix
+	 * @param array $alias
 	 */
-	protected function __construct($finder, $factory, $container, $view, $fetch, $prefix)
+	protected function __construct(\Closure $finder, \Closure $factory, array $alias)
 	{
 		// set view and fetch aliases
-		class_alias('\\Base\\View\\Engine', $view);
-		class_alias('\\Base\\View\\Fetch', $fetch);
+		class_alias('\\Base\\View\\Engine', $alias['view']);
+		class_alias('\\Base\\View\\Fetch', $alias['fetch']);
 		
+		// set factory
 		$this->factory = $factory;
 		
 		// set in static
 		static::$finder = $finder;
-		static::$container = $container;
-		static::$prefix = $prefix;
+	}
+	
+	
+	/**
+	 * Add Helper or helpers
+	 * @param string|array $nameOrHelpers
+	 * @param mixed $helper
+	 */
+	public function helper($nameOrHelpers, $helper = null)
+	{
+		if(is_array($nameOrHelpers)) {
+			static::$helpers = array_merge(static::$helpers, $nameOrHelpers);
+		} else {
+			static::$helpers[$nameOrHelpers] = $helper;
+		}
+		
+		$reserved = [
+			'info', 
+			'extend', 
+			'block',
+			'start', 
+			'end', 
+			'view', 
+			'html', 
+			'attribute',
+			'asset',
+			'assets',
+			'shared'
+		];
+		$intersect = array_intersect(array_keys(static::$helpers), $reserved);
+		if(count($intersect) > 0) {
+			throw new ViewEngineException('Tried to register view helper(s) under a reserved name: '.implode(', ',$intersect).'. Reserverd names are: '.implode(', ',$reserved));
+		}
 	}
 	
 	

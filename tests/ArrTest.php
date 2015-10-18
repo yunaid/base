@@ -17,18 +17,18 @@ class ArrTest extends PHPUnit_Framework_TestCase
 		
 		$arr = $this->make($data);
 		
-		$this->assertEquals($arr->get('foo.bar'), 'val1');
-		$this->assertEquals($arr->get(['foo', 'bar']), 'val1');
-		$this->assertEquals($arr->get('foo'), ['bar' => 'val1']);
-		$this->assertEquals($arr->get(['foo']), ['bar' => 'val1']);
+		$this->assertEquals('val1', $arr->get('foo.bar'));
+		$this->assertEquals('val1', $arr->get(['foo', 'bar']));
+		$this->assertEquals(['bar' => 'val1'], $arr->get('foo'));
+		$this->assertEquals(['bar' => 'val1'], $arr->get(['foo']));
 		
-		$this->assertEquals($arr->get('bar', 'default'), 'default');
-		$this->assertEquals($arr->get(['bar'], 'default'), 'default');
+		$this->assertEquals('default', $arr->get('bar', 'default'));
+		$this->assertEquals('default', $arr->get(['bar'], 'default'));
 		
-		$this->assertEquals($arr->get(), ['foo' => ['bar' => 'val1']]);
-		$this->assertEquals($arr->flat(), ['foo' => ['bar' => 'val1']]);
-		$this->assertEquals($arr->get(null), ['foo' => ['bar' => 'val1']]);
-		$this->assertEquals($arr->get(null, 'default'), ['foo' => ['bar' => 'val1']]);
+		$this->assertEquals(['foo' => ['bar' => 'val1']], $arr->get());
+		$this->assertEquals(['foo' => ['bar' => 'val1']], $arr->flat());
+		$this->assertEquals(['foo' => ['bar' => 'val1']], $arr->get(null));
+		$this->assertEquals(['foo' => ['bar' => 'val1']], $arr->get(null, 'default'));
 			
 	}
 	
@@ -46,10 +46,10 @@ class ArrTest extends PHPUnit_Framework_TestCase
 		
 		$arr = $this->make($data);
 		
-		$this->assertEquals($arr->get(['bar.baz', 'qux']), 'val2');
-		$this->assertEquals($arr->get(['bar', 'baz.qux']), 'val3');
-		$this->assertEquals($arr->get('bar.baz.qux'), 'val3');
-		$this->assertEquals($arr->get(['bar', 'baz',' qux'], 'default'), 'default');
+		$this->assertEquals('val2', $arr->get(['bar.baz', 'qux']));
+		$this->assertEquals('val3', $arr->get(['bar', 'baz.qux']));
+		$this->assertEquals('val3', $arr->get('bar.baz.qux'));
+		$this->assertEquals('default', $arr->get(['bar', 'baz',' qux'], 'default'));
 	}
 }
 

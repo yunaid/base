@@ -13,21 +13,21 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 		// non closure retrieval
 		$container = $this->make();
 		$container->set('foo' , 'bar');
-		$this->assertEquals($container->get('foo'), 'bar');
+		$this->assertEquals('bar', $container->get('foo'));
 		
 		// run a closure
 		$container = $this->make();
 		$container->set('foo' , function($container){
 			return 'bar';
 		});
-		$this->assertEquals($container->get('foo'), 'bar');
+		$this->assertEquals('bar', $container->get('foo'));
 		
 		// run a closure with arguments
 		$container = $this->make();
 		$container->set('foo' , function($container, $arg1, $arg2){
 			return $arg1.'-'.$arg2;
 		});
-		$this->assertEquals($container->get('foo', 'a', 'b'), 'a-b');
+		$this->assertEquals('a-b', $container->get('foo', 'a', 'b'));
 	}
 	
 	
@@ -36,7 +36,7 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 		// basic setter
 		$container = $this->make();
 		$container->set('foo' , 'bar');
-		$this->assertEquals($container->get('foo'), 'bar');
+		$this->assertEquals('bar', $container->get('foo'));
 		
 		// array setter
 		$container = $this->make();
@@ -44,8 +44,8 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 			'foo1' => 'bar1',
 			'foo2' => 'bar2',
 		]);
-		$this->assertEquals($container->get('foo1'), 'bar1');
-		$this->assertEquals($container->get('foo2'), 'bar2');
+		$this->assertEquals('bar1', $container->get('foo1'));
+		$this->assertEquals('bar2', $container->get('foo2'));
 	}
 	
 	
@@ -55,7 +55,7 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 		$container = $this->make();
 		$container->set('foo' , 'bar');
 		$container->alias('alias', 'foo');
-		$this->assertEquals($container->get('alias'), 'bar');
+		$this->assertEquals('bar', $container->get('alias'));
 		
 		// array setter
 		$container = $this->make();
@@ -68,8 +68,8 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 			'alias2' => 'foo2'
 		]);
 		
-		$this->assertEquals($container->get('alias1'), 'bar1');
-		$this->assertEquals($container->get('alias2'), 'bar2');
+		$this->assertEquals('bar1', $container->get('alias1'));
+		$this->assertEquals('bar2', $container->get('alias2'));
 		
 		
 		// test multiple alias
@@ -77,22 +77,22 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 		$container->set('foo' , 'bar');
 		$container->alias('alias1', 'foo');
 		$container->alias('alias2', 'foo');
-		$this->assertEquals($container->get('alias1'), 'bar');
-		$this->assertEquals($container->get('alias2'), 'bar');
+		$this->assertEquals('bar', $container->get('alias1'));
+		$this->assertEquals('bar', $container->get('alias2'));
 		
 		
 		// test alias same name
 		$container = $this->make();
 		$container->set('foo' , 'bar');
 		$container->alias('foo', 'foo');
-		$this->assertEquals($container->get('foo'), 'bar');
+		$this->assertEquals('bar', $container->get('foo'));
 		
 		// test alias precedence
 		$container = $this->make();
 		$container->set('foo' , 'bar');
 		$container->set('baz' , 'qux');
 		$container->alias('baz', 'foo');
-		$this->assertEquals($container->get('baz'), 'bar');
+		$this->assertEquals('bar', $container->get('baz'));
 	}
 	
 
@@ -104,7 +104,7 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 			return $arg;
 		});
 		$container->get('foo', 'a');
-		$this->assertEquals($container->get('foo', 'b'), 'a');
+		$this->assertEquals('a', $container->get('foo', 'b'));
 		
 		// the same but with separate calls
 		$container = $this->make();
@@ -113,7 +113,7 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 			return $arg;
 		});
 		$container->get('foo', 'a');
-		$this->assertEquals($container->get('foo', 'b'), 'a');
+		$this->assertEquals('a', $container->get('foo', 'b'));
 		
 		
 		// the same but with array setter
@@ -131,8 +131,8 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 		
 		$container->get('foo', 'a');
 		$container->get('bar', 'a');
-		$this->assertEquals($container->get('foo', 'b'), 'a');
-		$this->assertEquals($container->get('bar', 'b'), 'a');
+		$this->assertEquals('a', $container->get('foo', 'b'));
+		$this->assertEquals('a', $container->get('bar', 'b'));
 		
 	}
 	
@@ -145,7 +145,7 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 		$container->set('foo' , function($container){
 			return 'bar';
 		});
-		$this->assertEquals($container->make('foo'), 'bar');
+		$this->assertEquals('bar', $container->make('foo'));
 
 		
 		// run a shared closure: new result should be used
@@ -154,7 +154,7 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 			return $arg;
 		});
 		$container->get('foo', 'a');
-		$this->assertEquals($container->make('foo', 'b'), 'b');
+		$this->assertEquals('b', $container->make('foo', 'b'));
 	}
 	
 
@@ -166,7 +166,7 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 		->set('foo', function($container, $name){
 			return $name;
 		});
-		$this->assertEquals($container->get('foo'), 'bar');
+		$this->assertEquals('bar', $container->get('foo'));
 		
 		// grouped shared definitions: new names produce new instances once
 		$container = $this->make();
@@ -176,11 +176,11 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 		->set('foo', function($container, $name, $arg = null){
 			return $arg;
 		});
-		$this->assertEquals($container->get('foo', 'bar', 'a'), 'a');
-		$this->assertEquals($container->get('foo', 'bar', 'b'), 'a');
-		$this->assertEquals($container->get('foo', 'baz', 'a'), 'a');
-		$this->assertEquals($container->get('foo', 'baz', 'b'), 'a');
-		$this->assertEquals($container->get('foo'), 'a');
+		$this->assertEquals('a', $container->get('foo', 'bar', 'a'));
+		$this->assertEquals('a', $container->get('foo', 'bar', 'b'));
+		$this->assertEquals('a', $container->get('foo', 'baz', 'a'));
+		$this->assertEquals('a', $container->get('foo', 'baz', 'b'));
+		$this->assertEquals('a', $container->get('foo'));
 	}
 	
 	
@@ -194,7 +194,7 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 		$container->set('baz' , function($container){
 			return $container->get('foo');
 		});
-		$this->assertEquals($container->make('baz'), 'bar');
+		$this->assertEquals('bar', $container->make('baz'));
 		
 		
 	}
@@ -254,7 +254,7 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 		$container = $container = $this->make();
 		$container->set('foo', 'bar1');
 		$container->set('foo', 'bar2');
-		$this->assertEquals($container->get('foo'), 'bar2');
+		$this->assertEquals('bar2', $container->get('foo'));
 
 		
 		// basic inheritance
@@ -263,7 +263,7 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 		$container->set('foo', function($container){
 			return $container->parent('foo');
 		});
-		$this->assertEquals($container->get('foo'), 'bar');
+		$this->assertEquals('bar', $container->get('foo'));
 
 		
 		//multiple levels inheritance
@@ -275,7 +275,7 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 		$container->set('foo', function($container){
 			return $container->parent('foo').'-2';
 		});
-		$this->assertEquals($container->get('foo'), 'bar-1-2');
+		$this->assertEquals('bar-1-2', $container->get('foo'));
 		
 		
 		// nested inheritance
@@ -289,9 +289,8 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 			}
 			return $container->parent('foo', $arg);
 		});
-		$this->assertEquals($container->get('foo'), 'default');
+		$this->assertEquals('default', $container->get('foo'));
 	}
-	
 	
 	
 	public function testAliasedSharedGroupedNestedInheritance()
@@ -312,11 +311,11 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 		})
 		->alias('alias', 'foo');
 		
-		$this->assertEquals($container->get('alias'), 'default');
-		$this->assertEquals($container->get('alias', 'bar'), 'default');
-		$this->assertEquals($container->get('alias', 'bar' ,'a'), 'default');
+		$this->assertEquals('default', $container->get('alias'));
+		$this->assertEquals('default', $container->get('alias', 'bar'));
+		$this->assertEquals('default', $container->get('alias', 'bar' ,'a'));
 		
-		$this->assertEquals($container->get('alias', 'baz', 'a'), 'a');
-		$this->assertEquals($container->get('alias', 'baz', 'b'), 'a');
+		$this->assertEquals('a', $container->get('alias', 'baz', 'a'));
+		$this->assertEquals('a', $container->get('alias', 'baz', 'b'));
 	}
 }

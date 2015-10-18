@@ -14,41 +14,41 @@ class ValidationTest extends PHPUnit_Framework_TestCase
 		$validation->rule('foo','required');
 		
 		// rule fails
-		$this->assertEquals($validation->validate('foo', null), false);
-		$this->assertEquals($validation->error('foo'), ['required']);
-		$this->assertEquals($validation->errors(), ['foo' => ['required']]);
+		$this->assertEquals(false, $validation->validate('foo', null));
+		$this->assertEquals(['required'], $validation->error('foo'));
+		$this->assertEquals(['foo' => ['required']], $validation->errors());
 		
 		// rule passes
-		$this->assertEquals($validation->validate('foo', 'baz'), true);
-		$this->assertEquals($validation->error('foo'), []);
-		$this->assertEquals($validation->errors(), []);
+		$this->assertEquals(true, $validation->validate('foo', 'baz'));
+		$this->assertEquals([], $validation->error('foo'));
+		$this->assertEquals([], $validation->errors());
 		
 		// test value set: fails
-		$this->assertEquals($validation->validate([]), false);
-		$this->assertEquals($validation->error('foo'), ['required']);
-		$this->assertEquals($validation->errors(), ['foo' => ['required']]);
+		$this->assertEquals(false, $validation->validate([]));
+		$this->assertEquals(['required'], $validation->error('foo'));
+		$this->assertEquals(['foo' => ['required']], $validation->errors());
 		
 		// test value set: passes
-		$this->assertEquals($validation->validate('foo', 'baz'), true);
-		$this->assertEquals($validation->error('foo'), []);
-		$this->assertEquals($validation->errors(), []);
+		$this->assertEquals(true, $validation->validate('foo', 'baz'));
+		$this->assertEquals([], $validation->error('foo'));
+		$this->assertEquals([], $validation->errors());
 		
 		// multiple rules
 		$validation->rule('bar','is','qux');
 		
 		// fail
-		$this->assertEquals($validation->validate([]), false);
-		$this->assertEquals($validation->error('foo'), ['required']);
-		$this->assertEquals($validation->error('bar'), ['is']);
-		$this->assertEquals($validation->errors(), ['foo' => ['required'], 'bar' => ['is']]);
+		$this->assertEquals(false, $validation->validate([]));
+		$this->assertEquals(['required'], $validation->error('foo'));
+		$this->assertEquals(['is'], $validation->error('bar'));
+		$this->assertEquals(['foo' => ['required'], 'bar' => ['is']], $validation->errors());
 		
 		// only one fail
-		$this->assertEquals($validation->validate(['bar' => 'qux']), false);
-		$this->assertEquals($validation->errors(), ['foo' => ['required']]);
+		$this->assertEquals(false, $validation->validate(['bar' => 'qux']));
+		$this->assertEquals(['foo' => ['required']], $validation->errors());
 		
 		// pass
-		$this->assertEquals($validation->validate(['foo'=>'bar', 'bar' => 'qux']), true);
-		$this->assertEquals($validation->errors(), []);
+		$this->assertEquals(true, $validation->validate(['foo'=>'bar', 'bar' => 'qux']));
+		$this->assertEquals([], $validation->errors());
 	}
 	
 	
@@ -57,173 +57,163 @@ class ValidationTest extends PHPUnit_Framework_TestCase
 	{
 		// required
 		$validation = $this->make()->rule('foo','required');
-		$this->assertEquals($validation->validate([]), false);
-		$this->assertEquals($validation->validate(['foo' => '']), false);
-		$this->assertEquals($validation->validate(['foo' => null]), false);
-		$this->assertEquals($validation->validate(['foo' => []]), false);
-		$this->assertEquals($validation->validate(['foo' => false]), false);
+		$this->assertEquals(false, $validation->validate([]));
+		$this->assertEquals(false, $validation->validate(['foo' => '']));
+		$this->assertEquals(false, $validation->validate(['foo' => null]));
+		$this->assertEquals(false, $validation->validate(['foo' => []]));
+		$this->assertEquals(false, $validation->validate(['foo' => false]));
 		
-		$this->assertEquals($validation->validate(['foo' => '0']), true);
-		$this->assertEquals($validation->validate(['foo' => '-1']), true);
-		$this->assertEquals($validation->validate(['foo' => 'false']), true);
+		$this->assertEquals(true, $validation->validate(['foo' => '0']));
+		$this->assertEquals(true, $validation->validate(['foo' => '-1']));
+		$this->assertEquals(true, $validation->validate(['foo' => 'false']));
 		
 		// regex
 		$validation = $this->make()->rule('foo','regex', '#[0-9]+#');
-		$this->assertEquals($validation->validate([]), false);
-		$this->assertEquals($validation->validate(['foo' => '']), false);
-		$this->assertEquals($validation->validate(['foo' => null]), false);
-		$this->assertEquals($validation->validate(['foo' => []]), false);
-		$this->assertEquals($validation->validate(['foo' => false]), false);
-		$this->assertEquals($validation->validate(['foo' => 123]), false);
-		$this->assertEquals($validation->validate(['foo' => 'abc']), false);
+		$this->assertEquals(false, $validation->validate([]));
+		$this->assertEquals(false, $validation->validate(['foo' => '']));
+		$this->assertEquals(false, $validation->validate(['foo' => null]));
+		$this->assertEquals(false, $validation->validate(['foo' => []]));
+		$this->assertEquals(false, $validation->validate(['foo' => false]));
+		$this->assertEquals(false, $validation->validate(['foo' => 123]));
+		$this->assertEquals(false, $validation->validate(['foo' => 'abc']));
 		
-		$this->assertEquals($validation->validate(['foo' => '0']), true);
-		$this->assertEquals($validation->validate(['foo' => '456356']), true);
+		$this->assertEquals(true, $validation->validate(['foo' => '0']));
+		$this->assertEquals(true, $validation->validate(['foo' => '456356']));
 		
 		
 		// max
 		$validation = $this->make()->rule('foo','max', '2');
 
-		$this->assertEquals($validation->validate(['foo' => 3]), false);
-		$this->assertEquals($validation->validate(['foo' => 'abc']), false);
-		$this->assertEquals($validation->validate(['foo' => [1,2,3]]), false);
+		$this->assertEquals(false, $validation->validate(['foo' => 3]));
+		$this->assertEquals(false, $validation->validate(['foo' => 'abc']));
+		$this->assertEquals(false, $validation->validate(['foo' => [1,2,3]]));
 		
-		$this->assertEquals($validation->validate([]), true);
-		$this->assertEquals($validation->validate(['foo' => null]), true);
-		$this->assertEquals($validation->validate(['foo' => false]), true);
-		$this->assertEquals($validation->validate(['foo' => -1]), true);
-		$this->assertEquals($validation->validate(['foo' => 0]), true);
-		$this->assertEquals($validation->validate(['foo' => 1]), true);
-		$this->assertEquals($validation->validate(['foo' => []]), true);
-		$this->assertEquals($validation->validate(['foo' => [1,2]]), true);
-		$this->assertEquals($validation->validate(['foo' => 'a']), true);
-		$this->assertEquals($validation->validate(['foo' => 'ab']), true);
+		$this->assertEquals(true, $validation->validate([]));
+		$this->assertEquals(true, $validation->validate(['foo' => null]));
+		$this->assertEquals(true, $validation->validate(['foo' => false]));
+		$this->assertEquals(true, $validation->validate(['foo' => -1]));
+		$this->assertEquals(true, $validation->validate(['foo' => 0]));
+		$this->assertEquals(true, $validation->validate(['foo' => 1]));
+		$this->assertEquals(true, $validation->validate(['foo' => []]));
+		$this->assertEquals(true, $validation->validate(['foo' => [1,2]]));
+		$this->assertEquals(true, $validation->validate(['foo' => 'a']));
+		$this->assertEquals(true, $validation->validate(['foo' => 'ab']));
 		
 		
 		// min
 		$validation = $this->make()->rule('foo','min', '2');
 
-		$this->assertEquals($validation->validate([]), false);
-		$this->assertEquals($validation->validate(['foo' => null]), false);
-		$this->assertEquals($validation->validate(['foo' => false]), false);
-		$this->assertEquals($validation->validate(['foo' => 1]), false);
-		$this->assertEquals($validation->validate(['foo' => 'a']), false);
-		$this->assertEquals($validation->validate(['foo' => [1]]), false);
+		$this->assertEquals(false, $validation->validate([]));
+		$this->assertEquals(false, $validation->validate(['foo' => null]));
+		$this->assertEquals(false, $validation->validate(['foo' => false]));
+		$this->assertEquals(false, $validation->validate(['foo' => 1]));
+		$this->assertEquals(false, $validation->validate(['foo' => 'a']));
+		$this->assertEquals(false, $validation->validate(['foo' => [1]]));
 		
-		$this->assertEquals($validation->validate(['foo' => 2]), true);
-		$this->assertEquals($validation->validate(['foo' => 3]), true);
-		$this->assertEquals($validation->validate(['foo' => [1,2]]), true);
-		$this->assertEquals($validation->validate(['foo' => [1,2,3]]), true);
-		$this->assertEquals($validation->validate(['foo' => 'ab']), true);
-		$this->assertEquals($validation->validate(['foo' => 'abc']), true);
+		$this->assertEquals(true, $validation->validate(['foo' => 2]));
+		$this->assertEquals(true, $validation->validate(['foo' => 3]));
+		$this->assertEquals(true, $validation->validate(['foo' => [1,2]]));
+		$this->assertEquals(true, $validation->validate(['foo' => [1,2,3]]));
+		$this->assertEquals(true, $validation->validate(['foo' => 'ab']));
+		$this->assertEquals(true, $validation->validate(['foo' => 'abc']));
 		
 		
 		// length
 		$validation = $this->make()->rule('foo','length', '2');
 
-		$this->assertEquals($validation->validate([]), false);
-		$this->assertEquals($validation->validate(['foo' => null]), false);
-		$this->assertEquals($validation->validate(['foo' => false]), false);
-		$this->assertEquals($validation->validate(['foo' => 2]), false);
-		$this->assertEquals($validation->validate(['foo' => 'a']), false);
-		$this->assertEquals($validation->validate(['foo' => [1]]), false);
+		$this->assertEquals(false, $validation->validate([]));
+		$this->assertEquals(false, $validation->validate(['foo' => null]));
+		$this->assertEquals(false, $validation->validate(['foo' => false]));
+		$this->assertEquals(false, $validation->validate(['foo' => 2]));
+		$this->assertEquals(false, $validation->validate(['foo' => 'a']));
+		$this->assertEquals(false, $validation->validate(['foo' => [1]]));
 		
-		$this->assertEquals($validation->validate(['foo' => [1,2]]), true);
-		$this->assertEquals($validation->validate(['foo' => 'ab']), true);
+		$this->assertEquals(true, $validation->validate(['foo' => [1,2]]));
+		$this->assertEquals(true, $validation->validate(['foo' => 'ab']));
 		
 		// is non strict
 		$validation = $this->make()->rule('foo','is', 0, false);
 
-		$this->assertEquals($validation->validate([]), false);
-		$this->assertEquals($validation->validate(['foo' => 1]), false);
-		$this->assertEquals($validation->validate(['foo' => [1]]), false);
+		$this->assertEquals(false, $validation->validate([]));
+		$this->assertEquals(false, $validation->validate(['foo' => 1]));
+		$this->assertEquals(false, $validation->validate(['foo' => [1]]));
 
-		$this->assertEquals($validation->validate(['foo' => 'abc']), true);
-		$this->assertEquals($validation->validate(['foo' => 0]), true);
-		$this->assertEquals($validation->validate(['foo' => false]), true);
-		$this->assertEquals($validation->validate(['foo' => '']), true);
+		$this->assertEquals(true, $validation->validate(['foo' => 'abc']));
+		$this->assertEquals(true, $validation->validate(['foo' => 0]));
+		$this->assertEquals(true, $validation->validate(['foo' => false]));
+		$this->assertEquals(true, $validation->validate(['foo' => '']));
 
 		
 		$validation = $this->make()->rule('foo','is', '123', false);
 
-		$this->assertEquals($validation->validate([]), false);
-		$this->assertEquals($validation->validate(['foo' => 1]), false);
-		$this->assertEquals($validation->validate(['foo' => 'a']), false);
-		$this->assertEquals($validation->validate(['foo' => [123]]), false);
+		$this->assertEquals(false, $validation->validate([]));
+		$this->assertEquals(false, $validation->validate(['foo' => 1]));
+		$this->assertEquals(false, $validation->validate(['foo' => 'a']));
+		$this->assertEquals(false, $validation->validate(['foo' => [123]]));
 
-		$this->assertEquals($validation->validate(['foo' => 123]), true);
-		$this->assertEquals($validation->validate(['foo' => '123']), true);
+		$this->assertEquals(true, $validation->validate(['foo' => 123]));
+		$this->assertEquals(true, $validation->validate(['foo' => '123']));
 		
 		
 		$validation = $this->make()->rule('foo','is', null, false);
-		$this->assertEquals($validation->validate(['foo' => 1]), false);
-		$this->assertEquals($validation->validate([]), true);
+		$this->assertEquals(false, $validation->validate(['foo' => 1]));
+		$this->assertEquals(true, $validation->validate([]));
 		
 		// is strict
 		$validation = $this->make()->rule('foo','is', 0);
 
-		$this->assertEquals($validation->validate([]), false);
-		$this->assertEquals($validation->validate(['foo' => 1]), false);
-		$this->assertEquals($validation->validate(['foo' => 'a']), false);
-		$this->assertEquals($validation->validate(['foo' => [1]]), false);
-		$this->assertEquals($validation->validate(['foo' => '']), false);
-		$this->assertEquals($validation->validate(['foo' => []]), false);
+		$this->assertEquals(false, $validation->validate([]));
+		$this->assertEquals(false, $validation->validate(['foo' => 1]));
+		$this->assertEquals(false, $validation->validate(['foo' => 'a']));
+		$this->assertEquals(false, $validation->validate(['foo' => [1]]));
+		$this->assertEquals(false, $validation->validate(['foo' => '']));
+		$this->assertEquals(false, $validation->validate(['foo' => []]));
 
-		$this->assertEquals($validation->validate(['foo' => 0]), true);
+		$this->assertEquals(true, $validation->validate(['foo' => 0]));
 
 		
 		$validation = $this->make()->rule('foo','is', '123');
 
-		$this->assertEquals($validation->validate([]), false);
-		$this->assertEquals($validation->validate(['foo' => 123]), false);
-		$this->assertEquals($validation->validate(['foo' => [123]]), false);
+		$this->assertEquals(false, $validation->validate([]));
+		$this->assertEquals(false, $validation->validate(['foo' => 123]));
+		$this->assertEquals(false, $validation->validate(['foo' => [123]]));
 
-		$this->assertEquals($validation->validate(['foo' => '123']), true);
+		$this->assertEquals(true, $validation->validate(['foo' => '123']));
 		
 		
 		// not non strict
 		$validation = $this->make()->rule('foo','not', 0);
 
-		$this->assertEquals($validation->validate(['foo' => 0]), false);
-		$this->assertEquals($validation->validate(['foo' => '0']), false);
-		$this->assertEquals($validation->validate([]), false);
-		$this->assertEquals($validation->validate(['foo' => '']), false);
-		$this->assertEquals($validation->validate(['foo' => false]), false);
+		$this->assertEquals(false, $validation->validate(['foo' => 0]));
+		$this->assertEquals(false, $validation->validate(['foo' => '0']));
+		$this->assertEquals(false, $validation->validate([]));
+		$this->assertEquals(false, $validation->validate(['foo' => '']));
+		$this->assertEquals(false, $validation->validate(['foo' => false]));
 		
-		$this->assertEquals($validation->validate(['foo' => 1]), true);
+		$this->assertEquals(true, $validation->validate(['foo' => 1]));
 		
 
 		$validation = $this->make()->rule('foo','not', 123);
 
-		$this->assertEquals($validation->validate(['foo' => 123]), false);
-		$this->assertEquals($validation->validate(['foo' => '123']), false);
+		$this->assertEquals(false, $validation->validate(['foo' => 123]));
+		$this->assertEquals(false, $validation->validate(['foo' => '123']));
 		
-		$this->assertEquals($validation->validate([]), true);
-		$this->assertEquals($validation->validate(['foo' => '']), true);
-		$this->assertEquals($validation->validate(['foo' => false]), true);
-		$this->assertEquals($validation->validate(['foo' => null]), true);
+		$this->assertEquals(true, $validation->validate([]));
+		$this->assertEquals(true, $validation->validate(['foo' => '']));
+		$this->assertEquals(true, $validation->validate(['foo' => false]));
+		$this->assertEquals(true, $validation->validate(['foo' => null]));
 
 		
 		// not strict
 		$validation = $this->make()->rule('foo','not', 0, true);
 
-		$this->assertEquals($validation->validate(['foo' => 0]), false);
+		$this->assertEquals(false, $validation->validate(['foo' => 0]));
 
-		$this->assertEquals($validation->validate([]), true);
-		$this->assertEquals($validation->validate(['foo' => '0']), true);
-		$this->assertEquals($validation->validate(['foo' => '']), true);
-		$this->assertEquals($validation->validate(['foo' => 1]), true);
-		$this->assertEquals($validation->validate(['foo' => false]), true);
-
-		
-		// int
-		$validation = $this->make()->rule('foo','int');
-		$this->assertEquals($validation->validate([]), false);
-		$this->assertEquals($validation->validate(['foo' => true]), false);
-		$this->assertEquals($validation->validate(['foo' => []]), false);
-		$this->assertEquals($validation->validate(['foo' => '123']), false);
-		$this->assertEquals($validation->validate(['foo' => 1.5]), false);
-		$this->assertEquals($validation->validate(['foo' => 123]), true);
+		$this->assertEquals(true, $validation->validate([]));
+		$this->assertEquals(true, $validation->validate(['foo' => '0']));
+		$this->assertEquals(true, $validation->validate(['foo' => '']));
+		$this->assertEquals(true, $validation->validate(['foo' => 1]));
+		$this->assertEquals(true, $validation->validate(['foo' => false]));
 	}
 	
 	
@@ -233,10 +223,10 @@ class ValidationTest extends PHPUnit_Framework_TestCase
 		$validation = $this->make()->rule('foo','custom', function($val){
 			return $val === 'bar';
 		});
-		$this->assertEquals($validation->validate([]), false);
-		$this->assertEquals($validation->validate(['foo' => 1]), false);
-		$this->assertEquals($validation->validate(['foo' => 'a']), false);
-		$this->assertEquals($validation->validate(['foo' => 'bar']), true);
+		$this->assertEquals(false, $validation->validate([]));
+		$this->assertEquals(false, $validation->validate(['foo' => 1]));
+		$this->assertEquals(false, $validation->validate(['foo' => 'a']));
+		$this->assertEquals(true, $validation->validate(['foo' => 'bar']));
 	}
 	
 }

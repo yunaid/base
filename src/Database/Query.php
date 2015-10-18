@@ -612,12 +612,12 @@ class Query
 					$alias = false;
 				}
 				if ($identifier instanceof \Base\Database\Raw) {
-					$query.= $separator . $identifier->expression() . ' ';
+					$query.= $separator . $identifier->expression();
 				} else {
-					$query.= $separator . $this->quoteIdentifier($identifier) . ' ';
+					$query.= $separator . $this->quoteIdentifier($identifier);
 				}
 				if ($alias) {
-					$query.= 'AS ' . $this->quoteIdentifier($alias) . ' ';
+					$query.= ' AS ' . $this->quoteIdentifier($alias);
 				}
 				$separator = ', ';
 			}
@@ -634,12 +634,12 @@ class Query
 		if ($table instanceof \Base\Database\Query) {
 			list($subQuery, $subParams) = $table->compile();
 			$params = array_merge($params, $subParams);
-			$query.= 'FROM (' . $subQuery . ') ';
+			$query.= ' FROM (' . $subQuery . ')';
 		} else {
-			$query.= 'FROM ' . $this->quoteTable($table) . ' ';
+			$query.= ' FROM ' . $this->quoteTable($table);
 		}
 		if ($alias) {
-			$query.= 'AS ' . $this->quoteTable($alias) . ' ';
+			$query.= ' AS ' . $this->quoteTable($alias);
 		}
 
 
@@ -684,17 +684,17 @@ class Query
 		// where
 		if (count($this->where) > 0) {
 			list($whereQuery, $whereParams) = $this->compileConditions($this->where);
-			$query.= 'WHERE ' . $whereQuery;
+			$query.= ' WHERE ' . $whereQuery;
 			$params = array_merge($params, $whereParams);
 		}
 
 		// group by
-		$separator = 'GROUP BY ';
+		$separator = ' GROUP BY ';
 		foreach ($this->group as $identifier) {
 			if ($identifier instanceof \Base\Database\Raw) {
-				$query.= $separator . $identifier->expression() . ' ';
+				$query.= $separator . $identifier->expression();
 			} else {
-				$query.= $separator . $this->quoteIdentifier($identifier) . ' ';
+				$query.= $separator . $this->quoteIdentifier($identifier);
 			}
 			$separator = ', ';
 		}
@@ -702,30 +702,30 @@ class Query
 		// having
 		if (count($this->having) > 0) {
 			list($havingQuery, $havingParams) = $this->compileConditions($this->having);
-			$query.= 'HAVING ' . $havingQuery . ' ';
+			$query.= ' HAVING ' . $havingQuery;
 			$params = array_merge($params, $havingParams);
 		}
 
 		// order
-		$separator = 'ORDER BY ';
+		$separator = ' ORDER BY ';
 		foreach ($this->order as $identifier => $direction) {
 			$direction = strtoupper($direction) === 'DESC' ? 'DESC' : 'ASC';
 			if ($identifier instanceof \Base\Database\Raw) {
-				$query.= $separator . $identifier->expression() . ' ' . $direction . ' ';
+				$query.= $separator . $identifier->expression() . ' ' . $direction;
 			} else {
-				$query.= $separator . $this->quoteIdentifier($identifier) . ' ' . $direction . ' ';
+				$query.= $separator . $this->quoteIdentifier($identifier) . ' ' . $direction;
 			}
 			$separator = ', ';
 		}
 
 		// limit
 		if ($this->limit !== false) {
-			$query .= 'LIMIT ' . (int) $this->limit . ' ';
+			$query .= ' LIMIT ' . (int) $this->limit;
 		}
 
 		// offset
 		if ($this->offset !== false) {
-			$query .= 'OFFSET ' . (int) $this->offset . ' ';
+			$query .= ' OFFSET ' . (int) $this->offset;
 		}
 
 		// union / union_all
@@ -734,9 +734,9 @@ class Query
 			list($unionQuery, $unionParams) = $union->compile();
 			$params = array_merge($params, $unionParams);
 			if ($unioned == false) {
-				$query = '(' . $query . ') ';
+				$query = '(' . $query . ')';
 			}
-			$query.= 'UNION (' . $unionQuery . ') ';
+			$query.= ' UNION (' . $unionQuery . ')';
 			$unioned = true;
 		}
 
@@ -746,7 +746,7 @@ class Query
 			if ($unioned == false) {
 				$query = '(' . $query . ') ';
 			}
-			$query.= 'UNION ALL (' . $unionQuery . ') ';
+			$query.= ' UNION ALL (' . $unionQuery . ')';
 			$unioned = true;
 		}
 
@@ -770,19 +770,19 @@ class Query
 		foreach ($this->values as $identifier => $value) {
 			$query .= $separator . $this->quoteIdentifier($identifier) . ' = ';
 			if ($value instanceof \Base\Database\Raw) {
-				$query .= $value->expression() . ' ';
+				$query .= $value->expression();
 			} elseif ($value === null) {
-				$query .= 'DEFAULT(' . $this->quoteIdentifier($identifier) . ') ';
+				$query .= 'DEFAULT(' . $this->quoteIdentifier($identifier) . ')';
 			} else {
 				$params [] = $value;
-				$query .= '? ';
+				$query .= '?';
 			}
 			$separator = ', ';
 		}
 
 		if (count($this->where) > 0) {
 			list($whereQuery, $whereParams) = $this->compileConditions($this->where);
-			$query.= 'WHERE ' . $whereQuery;
+			$query.= ' WHERE ' . $whereQuery;
 			$params = array_merge($params, $whereParams);
 		}
 		return [$query, $params];
@@ -823,7 +823,7 @@ class Query
 		foreach ($conditions as $condition) {
 
 			if (!$omitLogic && isset($condition['logic'])) {
-				$query .= $condition['logic'] . ' ';
+				$query .= ' '.$condition['logic'] . ' ';
 			}
 			$omitLogic = false;
 
@@ -831,41 +831,41 @@ class Query
 				$query .= '(';
 				$omitLogic = true;
 			} elseif ($condition['type'] === 'group_close') {
-				$query .= ') ';
+				$query .= ')';
 			} else {
 				$query .= $this->quoteIdentifier($condition['first']) . ' ';
 				if ($asOn == true) {
 					$query .= $condition['operator'] . ' ';
-					$query .= $this->quoteIdentifier($condition['second']) . ' ';
+					$query .= $this->quoteIdentifier($condition['second']);
 				} else {
 					if ($condition['second'] instanceof \Base\Database\Raw) {
 						$query .= $condition['operator'] . ' ';
-						$query .= $condition['second']->expression() . ' ';
+						$query .= $condition['second']->expression();
 					} elseif ($condition['operator'] == '=' && $condition['second'] === null) {
-						$query .= 'IS NULL ';
+						$query .= 'IS NULL';
 					} elseif (($condition['operator'] == '!=' || $condition['operator'] == '<>') && $condition['second'] === null) {
-						$query .= 'IS NOT NULL ';
+						$query .= 'IS NOT NULL';
 					} elseif ($condition['second'] instanceof \Base\Database\Query) {
 						list($subQuery, $subParams) = $condition['second']->compile();
 						$params = array_merge($params, $subParams);
 						$query .= $condition['operator'] . ' ';
-						$query.= '(' . $subQuery . ') ';
+						$query.= '(' . $subQuery . ')';
 					} elseif (is_array($condition['second'])) {
 						if ($condition['operator'] === 'BETWEEN' || $condition['operator'] === 'NOT BETWEEN') {
 							list($min, $max) = $condition['second'];
 							$params[] = $min;
 							$params[] = $max;
 							$query .= $condition['operator'] . ' ';
-							$query .= '? AND ? ';
+							$query .= '? AND ?';
 						} elseif ($condition['operator'] === 'IN') {
 							$query .= $condition['operator'] . ' ';
-							$query .= '(' . implode(',', array_fill(0, count($condition['second']), '?')) . ') ';
+							$query .= '(' . implode(',', array_fill(0, count($condition['second']), '?')) . ')';
 							$params = array_merge($params, $condition['second']);
 						}
 					} else {
 						$query .= strtoupper($condition['operator']) . ' ';
 						$params [] = $condition['second'];
-						$query .= '? ';
+						$query .= '?';
 					}
 				}
 			}

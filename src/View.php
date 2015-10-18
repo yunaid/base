@@ -150,6 +150,15 @@ class View
 		return $this->data;
 	}
 	
+	
+	/**
+	 * Get file, used by engine
+	 * @return string
+	 */
+	public function file()
+	{
+		return $this->file;
+	}
 
 	/**
 	 * Set and get blocks, used by engine
