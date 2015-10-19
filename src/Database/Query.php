@@ -134,10 +134,9 @@ class Query
 		'NOT BETWEEN', 
 		'ILIKE', 
 		'RLIKE',
-		'REXEXP', 
+		'REGEXP', 
 		'NOT REGEXP', 
 		'IN', 
-		'ISNULL', 
 		'SOUNDS LIKE',
 	];
 	
@@ -595,11 +594,6 @@ class Query
 		// select
 		$query = 'SELECT ';
 
-		//distinct
-		if (count($this->distinct) > 0) {
-			$query.= 'DISTINCT '.implode(', '.$this->distinct).', ';
-		}
-
 		// values
 		if (count($this->select) === 0) {
 			$query .= '* ';
@@ -623,6 +617,17 @@ class Query
 			}
 		}
 
+		//distinct
+		if (count($this->distinct) > 0) {
+			$query.= ' DISTINCT ';
+			$separator = '';
+			foreach ($this->distinct as $identifier) {
+				$query.= $separator . $this->quoteIdentifier($identifier);
+				$separator = ', ';
+			}
+			
+		}
+		
 		// from
 		if (is_array($this->table)) {
 			list($table, $alias) = $this->table;
@@ -647,7 +652,7 @@ class Query
 		if (count($this->joins) > 0) {
 			foreach ($this->joins as $join) {
 				if (in_array(strtoupper($join['type']), ['INNER', 'OUTER', 'LEFT', 'RIGHT', 'FULL'])) {
-					$query .= strtoupper($join['type']) . ' JOIN ';
+					$query .= ' ' . strtoupper($join['type']) . ' JOIN ';
 
 					if (is_array($join['table'])) {
 						list($table, $alias) = $join['table'];
@@ -658,23 +663,23 @@ class Query
 
 					$query.= $this->quoteTable($table) . ' ';
 					if ($alias) {
-						$query.= 'AS ' . $this->quoteTable($alias) . ' ';
+						$query.= 'AS ' . $this->quoteTable($alias);
 					}
 
 					$on = false;
 					if (count($join['on']) > 0) {
 						$on = true;
 						list($onQuery, $onParams) = $this->compileConditions($join['on'], true);
-						$query .= 'ON ' . $onQuery . ' ';
+						$query .= 'ON ' . $onQuery;
 						$params = array_merge($params, $onParams);
 					}
 
 					if (count($join['where']) > 0) {
 						list($onWhereQuery, $onWhereParams) = $this->compileConditions($join['where']);
 						if ($on === true) {
-							$query .= $join['where'][0]['logic'] . ' ';
+							$query .= ' ' . $join['where'][0]['logic'] . ' ';
 						}
-						$query.= $onWhereQuery . ' ';
+						$query.= $onWhereQuery;
 						$params = array_merge($params, $onWhereParams);
 					}
 				}
