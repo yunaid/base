@@ -2,10 +2,7 @@
 
 namespace Base\Cache;
 
-/**
- * 
- */
-class APC implements \Base\Contract\Cache\Adapter
+class APC extends \Base\Cache\Adapter
 {
 	/**
 	 * Params

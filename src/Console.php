@@ -2,15 +2,52 @@
 
 namespace Base;
 
+use \Base\Profile as Profile;
+use \Base\HTTP\Request as Request;
+use \Base\Router as Router;
+
 class Console
 {
-
+	/**
+	 * Line number
+	 * @var int 
+	 */
 	protected $nr = 1;
+	
+	/**
+	 * Profile object
+	 * @var \Base\Profile 
+	 */
 	protected $profile = null;
+	
+	/**
+	 * Request Object
+	 * @var \Base\HTTP\Request 
+	 */
 	protected $request = null;
+	
+	/**
+	 * Router Object
+	 * @var \Base\Router
+	 */
 	protected $router = null;
+	
+	/**
+	 * Log lines
+	 * @var array
+	 */
 	protected $log = [];
+	
+	/**
+	 * Backtrace
+	 * @var array 
+	 */
 	protected $trace = null;
+	
+	/**
+	 * Thrown exception
+	 * @var \Exception 
+	 */
 	protected $exception = null;
 
 
@@ -20,7 +57,7 @@ class Console
 	 * @param \Base\Request $request
 	 * @param \Base\Router $router
 	 */
-	public function __construct($profile = null, $request = null, $router = null)
+	public function __construct(Profile $profile = null, Request $request = null, Router $router = null)
 	{
 		$this->profile = $profile;
 		$this->request = $request;
@@ -29,7 +66,7 @@ class Console
 
 
 	/**
-	 * Dump variables
+	 * Put args in the log
 	 */
 	public function dump()
 	{
@@ -88,8 +125,8 @@ class Console
 
 	/**
 	 * Render the console
-	 * @param Mixed $active
-	 * @return String
+	 * @param string|boolean $active
+	 * @return string
 	 */
 	public function render($active = false)
 	{
@@ -97,8 +134,6 @@ class Console
 		$active = $active ? $active : 'log';
 		$buttons = '';
 		$groups = '';
-
-
 
 		// exception group
 		if ($this->exception !== null) {
@@ -172,8 +207,6 @@ class Console
 
 
 
-
-
 		// includes group
 		$buttons .= str_replace(['{{group}}', '{{label}}'], ['included', 'Included'], $this->templateButton);
 		$this->nr = 1;
@@ -206,9 +239,9 @@ class Console
 
 	/**
 	 * Render a table row in the console
-	 * @param Array $cols
-	 * @param Boolean $nr Show line number
-	 * @return String
+	 * @param array $cols
+	 * @param boolean $nr Show line number
+	 * @return string
 	 */
 	protected function renderRow($cols = [], $nr = true)
 	{
@@ -256,13 +289,13 @@ class Console
 
 	/**
 	 * var_dump with markup and depth limit
-	 * @staticvar type $marker
+	 * @staticvar string $marker
 	 * @staticvar array $objects
-	 * @param Mixed $var
+	 * @param mixed $var
 	 * @param int $length
 	 * @param int $limit
 	 * @param int $level
-	 * @return String
+	 * @return string
 	 */
 	protected function renderVar($var, $length = 128, $limit = 3, $level = 0)
 	{
@@ -374,8 +407,8 @@ class Console
 
 	/**
 	 * Render a stacktrace into nicer chunk of HTML
-	 * @param Array $trace
-	 * @return Array
+	 * @param array $trace
+	 * @return array
 	 */
 	public function renderTrace($trace)
 	{
@@ -443,7 +476,7 @@ class Console
 
 	/**
 	 * Render lines of a file
-	 * @param String $file
+	 * @param string $file
 	 * @param int $linenr
 	 * @param int $padding
 	 * @return string
@@ -680,9 +713,19 @@ class Console
 	})(window,document);
 </script>
 BASE;
+	
+	/**
+	 * Button template
+	 * @var string
+	 */
 	protected $templateButton = <<<BASE
 <span class="base-console-button" data-for="{{group}}">{{label}}</span>
 BASE;
+	
+	/**
+	 * Group template
+	 * @var string 
+	 */
 	protected $templateGroup = <<<BASE
 <div class="base-console-group" data-id="{{group}}">
 	<table width="100%">
@@ -690,6 +733,11 @@ BASE;
 	</table>
 </div>
 BASE;
+	
+	/**
+	 * Row template
+	 * @var string 
+	 */
 	protected $templateRow = <<<BASE
 <tr class="base-console-row {{oddeven}}">
 	<td class="base-console-linenr">{{nr}}</td>{{row}}

@@ -2,7 +2,7 @@
 
 namespace Base;
 
-use \Base\Contract\Cache\Adapter as Adapter;
+use \Base\Cache\Adapter as Adapter;
 
 class Cache
 {
@@ -31,7 +31,7 @@ class Cache
 	/**
 	 * Constructor
 	 * @param string $group
-	 * @param \Base\Contract\Cache\Adapter $adapter
+	 * @param \Base\Cache\Adapter $adapter
 	 * @param array $params
 	 */
 	public function __construct($group, Adapter $adapter, array $params = [])

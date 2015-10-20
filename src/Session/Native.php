@@ -12,7 +12,7 @@ class Native extends Driver
 	 * Constructor
 	 * @param array $params
 	 * @param \Base\Cookie $cookie
-	 * @param \Base\Encryptin $encryption
+	 * @param \Base\Encryption $encryption
 	 */
 	public function __construct(array $params, Cookie $cookie, Encryption $encryption = null)
 	{
@@ -48,9 +48,8 @@ class Native extends Driver
 
 
 	/**
-	 * Get data
-	 * @return array
-	 */
+	* {@inheritdoc}
+	*/
 	protected function retrieve()
 	{
 		// return the session data key
@@ -59,10 +58,9 @@ class Native extends Driver
 
 
 	/**
-	 * Store data
-	 * @param array $data
-	 */
-	protected function store(array $data)
+	* {@inheritdoc}
+	*/
+	protected function store($data)
 	{
 		$_SESSION['data'] = $data;
 		session_write_close();
@@ -70,8 +68,8 @@ class Native extends Driver
 
 	
 	/**
-	 * Reset the session cookie lifetime
-	 */
+	* {@inheritdoc}
+	*/
 	public function extend()
 	{
 		// start the session to prevent garbage collection
@@ -84,8 +82,8 @@ class Native extends Driver
 	
 	
 	/**
-	 * Destroy the session
-	 */
+	* {@inheritdoc}
+	*/
 	public function destroy()
 	{
 		session_destroy();

@@ -2,7 +2,7 @@
 
 namespace Base\Session;
 
-use \Base\Database as Database;
+use \Base\Database as DB;
 use \Base\Cookie as Cookie;
 use \Base\Encryption as Encryption;
 
@@ -35,7 +35,7 @@ class Database extends Driver
 	 * @param \Base\Cookie $cookie
 	 * @param \Base\Encryption $encryption
 	 */
-	public function __construct(array $params, Database $database, Cookie $cookie, Encryption $encryption = null)
+	public function __construct(array $params, DB $database, Cookie $cookie, Encryption $encryption = null)
 	{
 		// write on shutdown
 		register_shutdown_function([$this, 'write']);
@@ -86,7 +86,7 @@ class Database extends Driver
 
 	/**
 	 * Retrieve data from the database
-	 * @return array|boolean
+	 * @return string|boolean
 	 */
 	protected function retrieve()
 	{
@@ -101,9 +101,9 @@ class Database extends Driver
 	
 	/**
 	 * Store data in the database
-	 * @param array $data
+	 * @param string $data
 	 */
-	protected function store(array $data)
+	protected function store($data)
 	{
 		if($this->row === null) {
 			// create a new row

@@ -4,7 +4,7 @@ namespace Base\Cache;
 
 class CacheFileException extends \Exception {};
 
-class File implements \Base\Contract\Cache\Adapter
+class File extends \Base\Cache\Adapter
 {
 	/**
 	 * Spl file info cache dir

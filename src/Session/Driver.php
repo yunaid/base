@@ -130,11 +130,13 @@ abstract class Driver
 	
 	/**
 	 * Retrieve data from storage
+	 * @return string|null
 	 */
 	abstract protected function retrieve();
 	
 	/**
 	 * Store data
+	* @param string $data
 	 */
-	abstract protected function store(array $data);
+	abstract protected function store($data);
 }

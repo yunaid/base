@@ -1,8 +1,8 @@
 <?php
 
-namespace Base\Contract\Cache;
+namespace Base\Cache;
 
-interface Adapter
+abstract class Adapter
 {
 	
 	/**
@@ -11,7 +11,7 @@ interface Adapter
 	 * @param atring|array $default
 	 * @return mixed
 	 */
-	public function get($name, $default = null);
+	public abstract function get($name, $default = null);
 	
 	
 	/**
@@ -21,7 +21,7 @@ interface Adapter
 	 * @param int $lifetime in seconds
 	 * @return void
 	 */
-	public function set($name, $value, $lifetime = 3600);
+	public abstract function set($name, $value, $lifetime = 3600);
 	
 	
 	/**
@@ -30,5 +30,5 @@ interface Adapter
 	 * @param string $name
 	 * @return void
 	 */
-	public function delete($name = '*');
+	public abstract function delete($name = '*');
 }

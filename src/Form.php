@@ -2,37 +2,134 @@
 
 namespace Base;
 
+use \Base\Validation as Validation;
+use \Base\HTTP\Request as Request;
+
 class Form
 {
-
-	protected static $counter = 0;
+	/**
+	 * Unique id for each form
+	 * @var int 
+	 */
+	protected static $uid = 0;
+	
+	/**
+	 * Validation object
+	 * @var \Base\Validation 
+	 */
 	protected $valdiation = null;
+	
+	/**
+	 * Request object
+	 * @var \Base\HTTP\Request
+	 */
 	protected $request = null;
+	
+	/**
+	 * Closure to create elements
+	 * @var \Closure 
+	 */
 	protected $elementFactory = null;
+	
+	/**
+	 * Wheter the form was built or not
+	 * @var boolean 
+	 */
 	protected $built = false;
+	
+	/**
+	 * Wheter the form was precessed or not
+	 * @var boolean 
+	 */
 	protected $processed = false;
+	
+	/**
+	 * Was the form submitted
+	 * @var boolean 
+	 */
 	protected $submitted = false;
+	
+	/**
+	 * Is the form valid
+	 * @var boolean 
+	 */
 	protected $valid = false;
+	
+	/**
+	 * Form id
+	 * @var int 
+	 */
 	protected $id = 0;
+	
+	/**
+	 * Form action
+	 * @var string 
+	 */
 	protected $action = '';
+	
+	/**
+	 * Form method
+	 * @var string 
+	 */
 	protected $method = 'POST';
+	
+	/**
+	 * Form enctype
+	 * @var string 
+	 */
 	protected $enctype = 'multipart/form-data';
+	
+	/**
+	 * Other form attributes
+	 * @var array 
+	 */
 	protected $attributes = [];
+	
+	/**
+	 * Form fields, holds elements, default values, etc.
+	 * @var array 
+	 */
 	protected $fields = [];
+	
+	/**
+	 * List of elements. An elements can also have nested elements
+	 * @var array 
+	 */
 	protected $elements = [];
+	
+	/**
+	 * Registered rules
+	 * @var array 
+	 */
 	protected $rules = [];
+	
+	/**
+	 * Values by key
+	 * @var array 
+	 */
 	protected $values = [];
 
 
-	public function __construct($validation, $request, $elementFactory)
+	/**
+	 * Create a new form
+	 * @param type $validation
+	 * @param type $request
+	 * @param type $elementFactory
+	 */
+	public function __construct(Validation $validation, Request $request, \Closure $elementFactory)
 	{
-		$this->id = ++static::$counter;
+		$this->id = ++static::$uid;
 		$this->validation = $validation;
 		$this->request = $request;
 		$this->elementFactory = $elementFactory;
 	}
 
-
+	
+	/**
+	 * Get or set id
+	 * @param int|null $id
+	 * @return \Base\Form|int
+	 */
 	public function id($id = null)
 	{
 		if ($id === null) {
@@ -43,7 +140,12 @@ class Form
 		}
 	}
 
-
+	
+	/**
+	 * Get or set action
+	 * @param string|null $action
+	 * @return \Base\Form|string
+	 */
 	public function action($action = null)
 	{
 		if ($action === null) {
@@ -55,6 +157,11 @@ class Form
 	}
 
 
+	/**
+	 * Get or set method
+	 * @param string|null $method
+	 * @return \Base\Form|string
+	 */
 	public function method($method = null)
 	{
 		if ($method === null) {
@@ -65,7 +172,12 @@ class Form
 		}
 	}
 
-
+	
+	/**
+	 * Get or set enctype
+	 * @param string|null $enctype
+	 * @return \Base\Form|string
+	 */
 	public function enctype($enctype = null)
 	{
 		if ($enctype === null) {
@@ -76,8 +188,12 @@ class Form
 		}
 	}
 
-
-	public function attributes($attributes = null)
+	/**
+	 * Get or set attributes
+	 * @param array|null $attributes
+	 * @return \Base\Form|array
+	 */
+	public function attributes(array $attributes = null)
 	{
 		if ($attributes === null) {
 			return $this->attributes;
@@ -92,33 +208,47 @@ class Form
 		}
 	}
 
-
-	public function element($key, $typeOrIndex = null, $params = [])
+	
+	/**
+	 * Add an element
+	 * @param string $key
+	 * @param string|int $typeOrIndex
+	 * @param array $params
+	 * @return null|array|\Base\Form\Element
+	 */
+	public function element($key, $typeOrIndex = null, array $params = [])
 	{
 		if ($typeOrIndex === null) {
+			// get element without index
 			if (isset($this->fields[$key])) {
 				if ($this->fields[$key]['group'] === true) {
+					// get entire group
 					return $this->fields[$key]['elements'];
 				} else {
+					// get first element
 					return $this->_fields[$key]['elements'][0];
 				}
 			} else {
 				return null;
 			}
 		} elseif (is_int($typeOrIndex)) {
+			// get indexed element
 			if (isset($this->fields[$key]) && isset($this->fields[$key]['elements'][$typeOrIndex])) {
 				return $this->fields[$key]['elements'][$typeOrIndex];
 			} else {
 				return null;
 			}
 		} else {
+			// create element
 			$type = $typeOrIndex;
-
 			$element = $this->elementFactory->__invoke($key, $type, $params, $this);
-
+			// store it
 			$this->elements[] = $element;
 
 			if (isset($this->fields[$key])) {
+				// element with the same key was already present
+				// So it is a set
+				// set the index in the element
 				$element->index(count($this->fields[$key]['elements']));
 				$this->fields[$key]['set'] = true;
 				$this->fields[$key]['elements'][] = $element;
@@ -137,8 +267,14 @@ class Form
 		}
 	}
 
-
-	public function group($type, $callable, $params = [])
+	
+	/**
+	 * Create a group of elements
+	 * @param string $type
+	 * @param \Closure $function
+	 * @param array $params
+	 */
+	public function group($type, \Closure $function, array $params = [])
 	{
 		// store curent elements
 		$elements = $this->elements;
@@ -147,22 +283,27 @@ class Form
 		$this->elements = [];
 
 		// call callable and let it register more elements or groups
-		if ($callable instanceof \Closure) {
-			$callable($this);
+		if (is_object($function) && method_exists($function, '__invoke')) {
+			$function($this);
 		}
 
 		// callable done: add the current elements as a group to the stored elements
 		$elements[] = (object) array_merge($params, [
-				'group' => true,
-				'type' => $type,
-				'elements' => $this->elements,
+			'group' => true,
+			'type' => $type,
+			'elements' => $this->elements,
 		]);
 
 		// restore the previous elements
 		$this->elements = $elements;
 	}
 
-
+	
+	/**
+	 * Add a rule
+	 * @param string $key
+	 * @param string $rule
+	 */
 	public function rule($key, $rule)
 	{
 		if ($rule === 'required') {
@@ -173,7 +314,11 @@ class Form
 		call_user_func_array([$this->validation, 'rule'], func_get_args());
 	}
 
-
+	
+	/**
+	 * Start using form
+	 * If the form was not built, build it
+	 */
 	protected function init()
 	{
 		if ($this->built === false) {
@@ -186,12 +331,15 @@ class Form
 
 			// call the user defined build function
 			if (method_exists($this, 'build')) {
-				$this->build($this);
+				$this->build();
 			}
 		}
 	}
 
-
+	
+	/**
+	 * Process the form
+	 */
 	public function process()
 	{
 		if ($this->built === false) {
@@ -199,7 +347,7 @@ class Form
 		}
 
 		if ($this->processed === false) {
-			// prcess only once
+			// process only once
 			$this->processed = true;
 
 			// check if submitted

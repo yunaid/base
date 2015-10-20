@@ -4,11 +4,22 @@ namespace Base;
 
 class Profile
 {
-	// start time
+	/**
+	 * Start time
+	 * @var int 
+	 */
 	protected $start = 0;
-	// active profilers
+	
+	/**
+	 * Active profiling groups
+	 * @var array
+	 */
 	protected $profiling = [];
-	// profiling groups
+	
+	/**
+	 * All profiler groups
+	 * @var array 
+	 */
 	protected $groups = [];
 
 	
@@ -27,10 +38,10 @@ class Profile
 	 * Start a profiling session
 	 * Returns a token that can be used to end the session
 	 * @param string $group
-	 * @param Array $data additional data
+	 * @param array $data additional data
 	 * @return string 
 	 */
-	public function start($group, $data = [])
+	public function start($group, array $data = [])
 	{
 		$token = md5(microtime() . '_' . rand(0, 1000000));
 
@@ -54,7 +65,7 @@ class Profile
 	 * End a profiling session
 	 * When no profiling token is passed, the data from the start of the object will be returned
 	 * @param string $token
-	 * @return void | array
+	 * @return array|void
 	 */
 	public function end($token = null)
 	{

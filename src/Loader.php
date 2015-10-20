@@ -4,18 +4,31 @@ namespace Base;
 
 class Loader {
 
-	// Class aliases used
+	/**
+	 * Aliases to use
+	 * @var array 
+	 */
 	protected $aliases = [];
 	
-	// Prefixes that map to specific paths
+	/**
+	 * PSR-4 Prefixes that map to specific paths
+	 * @var array 
+	 */
 	protected $prefixes = [];
 	
-	// one-to-one class to file mappings
+	/**
+	 * One-to-one class to file mappings
+	 * @var array 
+	 */
 	protected $map = [];
 	
-	// a cache array for found files
+	/**
+	 * A cache array for found files
+	 * @var array 
+	 */
 	protected $found = [];
 
+	
 	/**
 	 * Set prefixes
 	 * @param string|array $prefixesOrPrefix
@@ -74,6 +87,7 @@ class Loader {
 		spl_autoload_register([$this, 'resolve']);
 	}
 
+	
 	/**
 	 * Resolve an unloaded class
 	 * @param string $class
