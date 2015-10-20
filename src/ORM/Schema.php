@@ -5,13 +5,16 @@ namespace Base\ORM;
 class Schema
 {
 
-	// Loaded schema files
+	/**
+	 * Loaded schema files
+	 * @var array 
+	 */
 	protected $loaded = [];
 
 
 	/**
 	 * Construct
-	 * @param Callable $finder
+	 * @param \Closure $finder
 	 */
 	public function __construct($finder)
 	{
@@ -22,7 +25,7 @@ class Schema
 	/**
 	 * Get a schema by name
 	 * @param string $name
-	 * @return array
+	 * @return array|null
 	 */
 	public function get($name)
 	{

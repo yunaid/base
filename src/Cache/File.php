@@ -4,7 +4,7 @@ namespace Base\Cache;
 
 class CacheFileException extends \Exception {};
 
-class File
+class File implements \Base\Contract\Cache\Adapter
 {
 	/**
 	 * Spl file info cache dir
@@ -48,11 +48,8 @@ class File
 
 	
 	/**
-	 * Get a stored value
-	 * @param string $name
-	 * @param string|array $default
-	 * @return mixed
-	 */
+	* {@inheritdoc}
+	*/
 	public function get($name, $default = null)
 	{
 		// explode on separator
@@ -111,12 +108,9 @@ class File
 
 
 	/**
-	 * Set a value
-	 * @param string $name
-	 * @param string|array $value
-	 * @param int $lifetime
-	 * @throws \Base\CacheFileException
-	 */
+	* {@inheritdoc}
+	* @throws \Base\CacheFileException
+	*/
 	public function set($name, $value, $lifetime = 3600)
 	{
 		// explode on separator
@@ -149,10 +143,8 @@ class File
 
 
 	/**
-	 * Delete one or more values
-	 * Wildcard allowed
-	 * @param string $name
-	 */
+	* {@inheritdoc}
+	*/
 	public function delete($name = '*')
 	{
 		// explode on separator

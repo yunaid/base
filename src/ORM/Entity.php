@@ -2,21 +2,40 @@
 
 namespace Base\ORM;
 
+use \Base\Database as Database;
+use \Base\ORM\Schema as Schema;
+use \Base\ORM\Mapper as Mapper;
+
 class Entity
 {
-	// the schema name
+	/**
+	 * The schema name
+	 * @var string 
+	 */
 	protected $name = null;
 	
-	// schema object with all schema information
+	/**
+	 * Schema object with all schema information
+	 * @var \Base\ORM\Schema 
+	 */
 	protected $schema = [];
 	
-	// database object used for persisting data
+	/**
+	 * Database object used for persisting data
+	 * @var \Base\Database 
+	 */
 	protected $database = null;
 	
-	// mapper object
+	/**
+	 * Mapper object
+	 * @var \Base\ORM\Mapper 
+	 */
 	protected $mapper = null;
 	
-	// params extracted from schema for this $name
+	/**
+	 * Params extracted from schema for this $name
+	 * @var array 
+	 */
 	protected $params = [
 		'database' => '',
 		'table' => '',
@@ -25,13 +44,22 @@ class Entity
 		'relations' => []
 	];
 	
-	// the loaded record
+	/**
+	 * The loaded record
+	 * @var \Base\ORM\Record 
+	 */
 	protected $record = null;
 	
-	// provided update to save later on
+	/**
+	 * Provided update to save later on
+	 * @var array 
+	 */
 	protected $data = [];
 	
-	// whether the entity has a loaded status
+	/**
+	 * Whether the entity has a loaded status
+	 * @var boolean 
+	 */
 	protected $loaded = null;
 	
 
@@ -42,7 +70,7 @@ class Entity
 	 * @param \Base\Database $database
 	 * @param \Base\ORM\Mapper $mapper
 	 */
-	public function __construct($name, $schema, $database, $mapper)
+	public function __construct($name, Schema $schema, Database $database, Mapper $mapper)
 	{
 		$this->name = $name;
 		$this->schema = $schema;
@@ -54,7 +82,7 @@ class Entity
 	
 	
 	/**
-	 * Use the mapper object to load data for id or set of filters
+	 * Use the mapper object to load data for id or a set of filters
 	 * @param int|array $idOrFilters
 	 * @return \Base\ORM\Entity
 	 */
@@ -70,7 +98,7 @@ class Entity
 	 * @param array $data
 	 * @return \Base\ORM\Entity|array
 	 */
-	public function data($data = null)
+	public function data(array $data = null)
 	{
 		if($data === null){
 			if($this->record !== null){
@@ -189,7 +217,7 @@ class Entity
 	 * @param array $pivot extra data for pivot
 	 * @return \Base\ORM\Entity
 	 */
-	public function add($name, $id, $pivot = [])
+	public function add($name, $id, array $pivot = [])
 	{
 		if($this->loaded() && isset($this->params['relations'][$name])){
 			$params = $this->params['relations'][$name];
@@ -254,7 +282,7 @@ class Entity
 	/**
 	 * Remove one or all many to many relations 
 	 * @param string $name
-	 * @param void|int $id
+	 * @param int $id
 	 * @return \Base\ORM\Entity
 	 */
 	public function remove($name, $id = null)
@@ -454,7 +482,7 @@ class Entity
 	/**
 	 * set a property in data
 	 * @param string $name
-	 * @param mixed $value
+	 * @param int|string $value
 	 */
 	public function __set($name, $value)
 	{
@@ -482,9 +510,10 @@ class Entity
 	/**
 	 * Call relations on a record
 	 * @param string $name relation name
+	 * @param array $args arguments
 	 * @return mixed
 	 */
-	public function __call($name, $args)
+	public function __call($name, array $args)
 	{
 		if($this->record !== null){
 			return call_user_func_array([ $this->record, $name ], $args);

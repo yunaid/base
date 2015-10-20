@@ -2,27 +2,39 @@
 
 namespace Base;
 
+use \Base\Contract\Cache\Adapter as Adapter;
+
 class Cache
 {
-	// params
+	/**
+	 * Params
+	 * @var array 
+	 */
 	protected $params = [
 		'active' => true,
 		'lifetime' => 3600
 	];
 	
-	// the cache adapter
+	/**
+	 * Adapter
+	 * @var \Base\Contract\Cache\Adapter
+	 */
 	protected $adapter = null;
 	
-	// the group (acts as a prefix)
+	/**
+	 * The group (acts as a prefix)
+	 * @var string 
+	 */
 	protected $group = 'default';
 	
 	
 	/**
 	 * Constructor
 	 * @param string $group
-	 * @param \Cache\Adapter $adapter
+	 * @param \Base\Contract\Cache\Adapter $adapter
+	 * @param array $params
 	 */
-	public function __construct($group, $adapter, $params = [])
+	public function __construct($group, Adapter $adapter, array $params = [])
 	{
 		$this->adapter = $adapter;
 		$this->group = $group;
@@ -34,7 +46,7 @@ class Cache
 	 * Set a value
 	 * @param string $name
 	 * @param string|array $value
-	 * @param int $lifetime
+	 * @param int|boolean $lifetime
 	 */
 	public function set($name, $value, $lifetime = false)
 	{

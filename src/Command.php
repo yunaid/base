@@ -2,18 +2,24 @@
 
 namespace Base;
 
+use \Base\Container as Container;
+
 class CommandException extends \Exception{}
 
 class Command
 {
-	// Container instance
+	/**
+	 * Container instance
+	 * @var \Base\Container 
+	 */
 	protected $container = null;
 
+	
 	/**
-	 * Cosntructor
+	 * Constructor
 	 * @param \Base\Container $container
 	 */
-	public function __construct(\Base\Container $container)
+	public function __construct(Container $container)
 	{
 		$this->container = $container;
 	}
@@ -21,7 +27,7 @@ class Command
 	
 	/**
 	 * Call the class
-	 * @return type
+	 * @return mixed
 	 */
 	public function __invoke()
 	{
@@ -29,12 +35,17 @@ class Command
 	}
 	
 	
-	protected function execute(){}
+	/**
+	 * The actual logic
+	 */
+	protected function execute()
+	{
+	}
 	
 	
 	/**
 	 * Shortcut
-	 * use the container to get an object
+	 * Use the container to get an object
 	 * @return mixed
 	 */
 	protected function get($name)

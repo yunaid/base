@@ -7,7 +7,10 @@ class ApplicationException extends \Exception {}
 class Base
 {
 
-	// container instance
+	/**
+	 * Container instance
+	 * @var \Base\Container 
+	 */
 	protected $container = null;
 
 
@@ -19,7 +22,7 @@ class Base
 	 * - Register Base providers
 	 * @param array $config
 	 */
-	public function __construct(array $config)
+	public function __construct(array $config = [])
 	{
 		// PHP settigns
 		date_default_timezone_set($config['base']['php']['timezone']);
@@ -69,7 +72,7 @@ class Base
 
 	/**
 	 * Execute the App for a http request
-	 * @return \Base\HTTP\Response
+	 * @return \Base\Base
 	 */
 	public function http()
 	{
@@ -126,7 +129,6 @@ class Base
 				}
 			}
 		}
-		// return the response
 		return $this;
 	}
 
@@ -142,7 +144,7 @@ class Base
 	
 	/**
 	 * Execute the App for a cli command
-	 * @return \Base\Application
+	 * @return \Base\Command
 	 */
 	public function cli()
 	{

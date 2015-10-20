@@ -2,28 +2,40 @@
 
 namespace Base\Session;
 
+use \Base\Database as Database;
+use \Base\Cookie as Cookie;
+use \Base\Encryption as Encryption;
+
 class Database extends Driver
 {
-	// database instance
+	/**
+	 * Database instance
+	 * @var \Base\Database 
+	 */
 	protected $database = null;
 	
-	// session id
+	/**
+	 * Session id
+	 * @var string 
+	 */
 	protected $id = null;
 	
-	// db row
+	/**
+	 * The db row containing the session
+	 * @var array 
+	 */
 	protected $row = null;
 	
 
 	/**
 	 * Constructor
 	 * Register write function
-	 * 
-	 * @param type $params
-	 * @param type $database
-	 * @param type $cookie
-	 * @param type $encryption
+	 * @param array $params
+	 * @param \Base\Database $database
+	 * @param \Base\Cookie $cookie
+	 * @param \Base\Encryption $encryption
 	 */
-	public function __construct($params, $database, $cookie, $encryption = null)
+	public function __construct(array $params, Database $database, Cookie $cookie, Encryption $encryption = null)
 	{
 		// write on shutdown
 		register_shutdown_function([$this, 'write']);
@@ -72,10 +84,9 @@ class Database extends Driver
 	}
 
 
-
 	/**
-	 * retrieve data from the database
-	 * @return array | boolean
+	 * Retrieve data from the database
+	 * @return array|boolean
 	 */
 	protected function retrieve()
 	{
@@ -89,10 +100,10 @@ class Database extends Driver
 
 	
 	/**
-	 * store data in the database
-	 * @return void
+	 * Store data in the database
+	 * @param array $data
 	 */
-	protected function store($data)
+	protected function store(array $data)
 	{
 		if($this->row === null) {
 			// create a new row
@@ -137,9 +148,7 @@ class Database extends Driver
 		$this->database->delete($this->params['table'])
 		->where($this->params['columns']['id'], $this->id)
 		->execute();
-		
 		$this->cookie->delete($this->params['name']);
-		
 		$this->id = null;
 	}
 

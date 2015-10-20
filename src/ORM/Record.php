@@ -2,6 +2,8 @@
 
 namespace Base\ORM;
 
+use \Base\ORM\Mapper as Mapper;
+
 /**
  * The Record object is returned by the Mapper class
  * when using the single or all methods (or one of the relation methods)
@@ -14,26 +16,53 @@ namespace Base\ORM;
 class Record
 {
 
-	// Assoc array with data
+	/**
+	 * Assoc array with data
+	 * @var type 
+	 */
 	protected $data = null;
-	// prefix
+	
+	/**
+	 * Prefix
+	 * @var string 
+	 */
 	protected $prefix = '';
-	// Reference to the parent mapper object
+	
+	/**
+	 * Parent mapper object
+	 * @var \Base\ORM\Mapper 
+	 */
 	protected $mapper = null;
-	// Available columns
+	
+	/**
+	 * Available columns
+	 * @var array 
+	 */
 	protected $columns = [];
-	// Available relations
+	
+	/**
+	 * Available relations
+	 * @var array 
+	 */
 	protected $relations = [];
-	// Available methods in mapper
+	
+	/**
+	 * Available methods in mapper
+	 * @var type 
+	 */
 	protected $methods = [];
 	
 	
 	/**
 	 * Constructor
-	 * @param Array $data
+	 * @param array $data
+	 * @param string $prefix
 	 * @param \Base\ORM\Mapper $mapper
+	 * @param array $columns
+	 * @param array $relations
+	 * @param array $methods
 	 */
-	public function __construct($data = [], $prefix = '', $mapper = null, $columns = [], $relations = [], $methods = [])
+	public function __construct(array $data = [], $prefix = '', Mapper $mapper = null, array $columns = [], array $relations = [], array $methods = [])
 	{
 		$this->data = $data;
 		$this->prefix = $prefix;
@@ -46,7 +75,7 @@ class Record
 
 	/**
 	 * get the raw record data
-	 * @return Array
+	 * @return array
 	 */
 	public function data()
 	{
@@ -57,7 +86,7 @@ class Record
 	/**
 	 * Get data as flat array
 	 * Include for relations an array with ids will be included
-	 * @return Array
+	 * @return array
 	 */
 	public function flat()
 	{
@@ -67,8 +96,8 @@ class Record
 
 	/**
 	 * Get a pivot value
-	 * @param String $name
-	 * @return Mixed
+	 * @param string $name
+	 * @return int|string|array|null
 	 */
 	public function pivot($name)
 	{
@@ -86,8 +115,8 @@ class Record
 	 * If that fails, we'll assume it is a relation and let the parent mapper 
 	 * figure it out
 	 * 
-	 * @param String $name
-	 * @return Mixed
+	 * @param string $name
+	 * @return int|string|array|null
 	 */
 	public function __get($name)
 	{
@@ -124,9 +153,9 @@ class Record
 	 * Or call a relation with amount / skip / sort
 	 * @param string $name
 	 * @param array $args
-	 * @return mixed
+	 * @return int|string|array|null
 	 */
-	public function __call($name, $args)
+	public function __call($name, array $args)
 	{
 		if ($this->mapper !== null) {
 			if(in_array($name, $this->methods)) {
@@ -144,8 +173,8 @@ class Record
 
 	
 	/**
-	 * control the debug info
-	 * @return type
+	 * Control the debug info
+	 * @return array
 	 */
 	public function __debugInfo()
 	{
@@ -154,12 +183,11 @@ class Record
 
 
 	/**
-	 * control the debug info
-	 * @return type
+	 * Control the debug info
+	 * @return string
 	 */
 	public function __toString()
 	{
 		return $this->prefix . var_export($this->data, true);
 	}
-
 }

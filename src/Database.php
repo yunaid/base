@@ -4,13 +4,19 @@ namespace Base;
 
 class Database
 {
-	// Factory for new \Base\Database\Query objects
+	/**
+	 * Factory for new \Base\Database\Query objects
+	 * @var \Closure 
+	 */
 	protected $queryFactory = null;
 	
-	// Factory for new \Base\Database\Raw objects
+	/**
+	 * Factory for new \Base\Database\Raw objects
+	 * @var \Closure 
+	 */
 	protected $rawFactory = null;
 
-	
+
 	/**
 	 * Constructor
 	 * @param \Closure $queryFactory

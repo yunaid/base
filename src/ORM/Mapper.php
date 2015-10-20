@@ -2,31 +2,60 @@
 
 namespace Base\ORM;
 
+use \Base\Database as Database;
+use \Base\Database\Query as Query;
+use \Base\ORM\Schema as Schema;
+use \Base\ORM\Record as Record;
+
 class Mapper implements \Iterator
 {
 
-	// The name of the schema for this mapper
+	/**
+	 * The name of the schema for this mapper
+	 * @var string 
+	 */
 	protected $name = null;
 	
-	// Alias used in queries for this mapper
+	/**
+	 * Alias used in queries for this mapper
+	 * @var string 
+	 */
 	protected $alias = '';
 	
-	// The Schema object holding params for all mappers
+	/**
+	 * The Schema object holding params for all mappers
+	 * @var \Base\ORM\Schema 
+	 */
 	protected $schema = null;
 	
-	// Creates records with make()
+	/**
+	 * Creates records with __invoke()
+	 * @var \Closure 
+	 */
 	protected $recordFactory = null;
 	
-	// Creates mappers with make()
+	/**
+	 * Creates mappers with __invoke()
+	 * @var \Closure 
+	 */
 	protected $mapperFactory = null;
 	
-	// DB instance
+	/**
+	 * DB instance
+	 * @var \Base\Database 
+	 */
 	protected $database = null;
 	
-	// Basic select query. Will be cloned to create actual query. use Query methods to access the query directly
+	/**
+	 * Basic select query. Will be cloned to create actual query. use Query methods to access the query directly
+	 * @var \Base\Database\Query 
+	 */
 	protected $query = null;
 	
-	// The params extracted from schema for this mapper / name
+	/**
+	 * The params extracted from schema for this mapper / name
+	 * @var array 
+	 */
 	protected $params = [
 		'database' => '',
 		'table' => '',
@@ -34,33 +63,89 @@ class Mapper implements \Iterator
 		'relations' => []
 	];
 	
-	// Mapper: the relational parent of the mapper.
+	/**
+	 * The relational parent of the mapper.
+	 * @var \Base\ORM\Mapper 
+	 */
 	protected $origin = null;
 	
-	// Array with mappers created for relations the of produced records
+	/**
+	 * Array with mappers created for relations the of produced records
+	 * @var array 
+	 */
 	protected $relations = [];
 	
-	// Modifiers
+	/**
+	 * Only select these fields
+	 * @var array 
+	 */
 	protected $only = [];
+	
+	/**
+	 * Also select these fields or 'belongs' or 'one' relations
+	 * @var array 
+	 */
 	protected $with = [];
+	
+	/**
+	 * Filters to use when calling 'all' or 'one'
+	 * ['name' => ['first' , 'operator', 'second'], 'name' => \Closure, ...]
+	 * @var array 
+	 */
 	protected $filter = [];
+	
+	/**
+	 * Filters to apply to a pivot table
+	 * @var array 
+	 */
 	protected $filterPivot = [];
+	
+	/**
+	 * Order by ['field' => 'asc/desc',...]
+	 * @var array 
+	 */
 	protected $sort = [];
+	
+	/**
+	 * Order pivot
+	 * @var array 
+	 */
 	protected $sortPivot = [];
+	
+	/**
+	 * Limit results
+	 * @var int 
+	 */
 	protected $amount = null;
+	
+	/**
+	 * Skip results
+	 * @var int 
+	 */
 	protected $skip = null;
 	
-	// Helper methods, callable on records
+	/**
+	 * Helper methods, callable on records
+	 * @var array 
+	 */
 	protected $methods = [];
 	
-	// Iterator implementation
-	// PDO iterator, set by all()
+	/**
+	 * Iterator for resultset
+	 * @var \PDOStatement
+	 */
 	protected $iterator = null;
 	
-	// position for the implementation of Iterator
+	/**
+	 * Position for the implementation of \Iterator
+	 * @var int 
+	 */
 	protected $position = 0;
 	
-	// current row fetched from PDO, for the implementation of Iterator
+	/**
+	 * current row fetched from PDO, for the implementation of Iterator
+	 * @var array 
+	 */
 	protected $current = null;
 
 	
@@ -71,10 +156,10 @@ class Mapper implements \Iterator
 	 * @param String $name
 	 * @param \Base\ORM\Schema $schema
 	 * @param \Base\Database $database
-	 * @param \Base\ORM\RecordFactory $recordFactory
-	 * @param \Base\ORM\MapperFactory $mapperFactory
+	 * @param \Closure $recordFactory
+	 * @param \Closure $mapperFactory
 	 */
-	public function __construct($name, $schema, $database, $recordFactory, $mapperFactory)
+	public function __construct($name, Schema $schema, Database $database, \Closure $recordFactory, \Closure $mapperFactory)
 	{
 		$this->name = $name;
 		$this->alias = $this->name;
@@ -90,9 +175,9 @@ class Mapper implements \Iterator
 
 	
 	/**
-	 * Get or Set with.
-	 * @param mixed $with Array or String to add, null to get
-	 * @return mixed \Base\ORM\Mapper or Array
+	 * Get or set with.
+	 * @param array|string|null
+	 * @return array|\Base\ORM\Mapper
 	 */
 	public function with($with = null)
 	{
@@ -110,7 +195,7 @@ class Mapper implements \Iterator
 	/**
 	 * Select only specific values to keep queries small. 
 	 * Be careful ,as it will omit foreign keys needed for joins
-	 * @param Mixed $only Array for multiple values String to set single value
+	 * @param string|array $only
 	 * @return \Base\ORM\Mapper
 	 */
 	public function only($only)
@@ -125,9 +210,9 @@ class Mapper implements \Iterator
 
 	/**
 	 * Add a filter
-	 * @param String|Callable|Array $keyOrCallableOrFilters 
-	 * @param String|Callable $operatorOrValuesOrCallable
-	 * @param Mixed $value
+	 * @param string|\Closure|array $keyOrCallableOrFilters 
+	 * @param string|\Closure $operatorOrValuesOrCallable
+	 * @param int|string $value
 	 * @return \Base\ORM\Mapper
 	 */
 	public function filter($keyOrCallableOrFilters = null, $operatorOrValueOrCallable = null, $value = null)
@@ -159,7 +244,7 @@ class Mapper implements \Iterator
 
 	/**
 	 * Remove all filters on a specific key
-	 * @param type $key
+	 * @param string $key
 	 * @return \Base\ORM\Mapper
 	 */
 	public function unfilter($key = null)
@@ -176,13 +261,12 @@ class Mapper implements \Iterator
 	/**
 	 * Sort or sorts
 	 * Provide $key, $direction or array('key'=>'direction')
-	 * @param Mixed $keyOrSorts
-	 * @param String $direction ASC / DESC
+	 * @param string|array $keyOrSorts
+	 * @param string $direction ASC / DESC
 	 * @return \Base\ORM\Mapper
 	 */
 	public function sort($keyOrSorts = null, $direction = 'ASC')
 	{
-
 		if ($keyOrSorts === null) {
 			return $this->sort;
 		} elseif (is_array($keyOrSorts)) {
@@ -196,7 +280,7 @@ class Mapper implements \Iterator
 
 	/**
 	 * Remove all sorts on a key
-	 * @param Mixed $key String for a key, null for all
+	 * @param string|null $key string for a key, null for all
 	 * @return \Base\ORM\Mapper
 	 */
 	public function unsort($key = null)
@@ -248,11 +332,11 @@ class Mapper implements \Iterator
 	 * 
 	 * Or set a piece of query directly on the query object (select / where , etc.)
 	 * 
-	 * @param String $name
-	 * @param Array $arguments
+	 * @param string $name
+	 * @param array $arguments
 	 * @return \Base\ORM\Mapper
 	 */
-	public function __call($name, $arguments)
+	public function __call($name, array $arguments)
 	{
 		if (isset($this->params['relations'][$name])) {
 			// get mapper
@@ -277,25 +361,24 @@ class Mapper implements \Iterator
 
 	/**
 	 * Get a pivot
-	 * @param Callable $pivot
-	 * @return Mixed
+	 * @param \Closure $pivot
+	 * @return \Base\ORM\Mapper
 	 */
-	public function pivot($callable = null)
+	public function pivot($method = null)
 	{
-		if (is_object($callable) && method_exists($callable,'__invoke')) {
+		if (is_object($method) && method_exists($method,'__invoke')) {
 			// make sure calls to filter and sort go into a separate array
 			$filter = $this->filter;
 			$sort = $this->sort;
 			$this->filter = $this->filterPivot;
 			$this->sort =  $this->sortPivot;
 
-			$callable($this);
+			$method($this);
 			
 			$this->filter = $filter;
 			$this->sort = $sort;
 		}
 		return $this;
-		
 	}
 
 	
@@ -303,14 +386,13 @@ class Mapper implements \Iterator
 	 * Fire a query to get a collection of records
 	 * 
 	 * @param \Base\ORM\Record $record. Used when fetching relations of a record
-	 * @return String $name relation name to get
-	 * @return Mixid \Base\ORM\Mapper Array
+	 * @param string $name relation name to get
+	 * @return \Base\ORM\Mapper
 	 */
-	public function all($record = null, $name = null)
+	public function all(Record $record = null, $name = null)
 	{
 		// create a query
 		$query = $this->query();
-
 
 		if ($this->origin !== null && $record !== null) {
 			$relation = $this->origin->relation($name);
@@ -354,21 +436,19 @@ class Mapper implements \Iterator
 					break;
 			}
 		}
-
 		$this->iterator = $query->iterator();
 		return $this;
-		
 	}
 
 
 	/**
 	 * Get a single record. Either in relation to an origin or just by itself
-	 * @param Mixed $idOrFilters a record id or several filters. Will be omitted when getting a related record
+	 * @param int|string|array $idOrFilters a record id or several filters. Will be omitted when getting a related record
 	 * @param \Base\ORM\Record The record that is requesting a relation 
 	 * @param string $name The name of the relation that the record is requesting
-	 * @return \Base\ORM\Record
+	 * @return \Base\ORM\Record|null
 	 */
-	public function one($idOrFilters = null, $record = null, $name = null)
+	public function one($idOrFilters = null, Record $record = null, $name = null)
 	{
 		if ($this->origin !== null && in_array($name, $this->origin->with())) {
 			// data was already loaded 'with' the original record.
@@ -415,7 +495,7 @@ class Mapper implements \Iterator
 	 * @param \Base\Database\Query $query
 	 * @return int
 	 */
-	public function count($query = null)
+	public function count(Query $query = null)
 	{
 		if ($query === null) {
 			$query = $this->createQuery();
@@ -436,7 +516,7 @@ class Mapper implements \Iterator
 	 * @param Base\Database\Query $query
 	 * @return \Base\ORM\Mapper
 	 */
-	public function fetch($query)
+	public function fetch(Query $query)
 	{
 		$this->iterator = $query->iterator();
 		return $this;
@@ -449,7 +529,7 @@ class Mapper implements \Iterator
 	 * @param Base\Database\Query $query
 	 * @return Base\Database\Query
 	 */
-	public function query($query = null)
+	public function query(Query $query = null)
 	{
 		// create a query
 		if ($query === null) {
@@ -467,6 +547,10 @@ class Mapper implements \Iterator
 	}
 
 
+	/**
+	 * Clone the base select-query
+	 * @return \Base\Database\Query
+	 */
 	protected function createQuery()
 	{
 		$query = clone($this->query);
@@ -475,6 +559,10 @@ class Mapper implements \Iterator
 	}
 
 
+	/**
+	 * Apply filters to the query
+	 * @param \Base\Database\Query & $query
+	 */
 	protected function applyFilters(& $query)
 	{
 		foreach ($this->filter as $key => $filter) {
@@ -486,24 +574,36 @@ class Mapper implements \Iterator
 		}
 	}
 
-
-	protected function applySorts(& $query)
+	
+	/**
+	 * Apply sorts to the query
+	 * @param \Base\Database\Query & $query
+	 */
+	protected function applySorts(Query & $query)
 	{
 		foreach ($this->sort as $key => $direction) {
 			$query->order($this->alias . ':' . $key, $direction);
 		}
 	}
 
-
-	protected function applyAmount(& $query)
+	
+	/**
+	 * Apply amount to the query
+	 * @param \Base\Database\Query & $query
+	 */
+	protected function applyAmount(Query & $query)
 	{
 		if ($this->amount) {
 			$query->limit($this->amount);
 		}
 	}
 
-
-	protected function applySkip(& $query)
+	
+	/**
+	 * Apply skip to the query
+	 * @param \Base\Database\Query & $query
+	 */
+	protected function applySkip(Query & $query)
 	{
 		if ($this->skip) {
 			$query->offset($this->skip);
@@ -511,7 +611,11 @@ class Mapper implements \Iterator
 	}
 
 
-	protected function applyColumns(& $query)
+	/**
+	 * Apply basic colum select
+	 * @param \Base\Database\Query & $query
+	 */
+	protected function applyColumns(Query & $query)
 	{
 		if (!empty($this->only)) {
 			foreach ($this->only as $column) {
@@ -526,8 +630,12 @@ class Mapper implements \Iterator
 		}
 	}
 
-
-	protected function applyWith(& $query)
+	
+	/**
+	 * Apply extra columns
+	 * @param \Base\Database\Query & $query
+	 */
+	protected function applyWith(Query & $query)
 	{
 		foreach ($this->with as $with) {
 			if (isset($this->params['relations'][$with])) {
@@ -560,14 +668,14 @@ class Mapper implements \Iterator
 	 * First get a relation mapper, then call all() or one() on it
 	 * Called from a record
 	 * 
-	 * @param String $name the name of the relation
+	 * @param string $name the name of the relation
 	 * @param Base\ORM\Record
 	 * @param int $amount override or set amount of related items
 	 * @param int $skip override or set skipped number of related items
-	 * @param Array $sort override or set sorting
-	 * @return Mixed array($records) or Base\ORM\Record
+	 * @param array $sort override or set sorting
+	 * @return array|Base\ORM\Record|null
 	 */
-	public function related($name, $record, $amount = null, $skip = 0, $sort = array())
+	public function related($name, Record $record, $amount = null, $skip = 0, $sort = array())
 	{
 		if (isset($this->params['relations'][$name])) {
 			$type = $this->params['relations'][$name][1];
@@ -598,9 +706,9 @@ class Mapper implements \Iterator
 	 * If no record is given, flatten the current iterator
 	 * For the relations with multiple elements, include arrays with ids
 	 * @param Base\ORM\Record
-	 * @return Array
+	 * @return array
 	 */
-	public function flat($record = null)
+	public function flat(Record $record = null)
 	{
 		if($record === null) {
 			// no record given: flatten the iterator
@@ -638,10 +746,10 @@ class Mapper implements \Iterator
 	 * Relations can be present in the form of arrays with ids in the $data
 	 * They will all be queried to populate the relations
 	 * In a sense this is the reverse of the method 'flat'
-	 * @param Array $data
+	 * @param array $data
 	 * @return \Base\ORM\Record
 	 */
-	public function record($data = [])
+	public function record(array $data = [])
 	{
 		foreach($this->params['columns'] as $name => $type){
 			if(isset($data[$name])){
@@ -675,11 +783,11 @@ class Mapper implements \Iterator
 	/**
 	 * Define or call a helper method (calling will be done from a record)
 	 * @param string $name
-	 * @param \Base\Record || Closure $recordOrCallable
+	 * @param \Base\Record|\Closure $recordOrCallable
 	 * @param array $args
-	 * @return mixed || null
+	 * @return mixed|null
 	 */
-	public function method($name, $recordOrCallable, $args = array())
+	public function method($name, $recordOrCallable,array  $args = array())
 	{
 		if(is_object($definition) && method_exists($recordOrCallable, '__invoke')){
 			// define a method
@@ -702,18 +810,18 @@ class Mapper implements \Iterator
 		}
 	}
 	
-	
+
 	/**
 	 * The mapper is a relation to some parent mapper
-	 * Set that origin mapper and the name that it was sued under
-	 * 
-	 * also build an alias
+	 * Set that origin mapper and the name that it was used under
+	 * Also build an alias
 	 * 
 	 * This info is used when calling all() or one()
 	 * 
-	 * @param Object $origin
+	 * @param \Base\ORM\Mapper $origin
+	 * @param string $name
 	 */
-	public function origin($origin, $name)
+	public function origin(Mapper $origin, $name)
 	{
 		// set the origin
 		$this->origin = $origin;
@@ -724,7 +832,7 @@ class Mapper implements \Iterator
 
 	/**
 	 * Get the mapper alias
-	 * @return String
+	 * @return string
 	 */
 	public function alias()
 	{
@@ -734,8 +842,8 @@ class Mapper implements \Iterator
 
 	/**
 	 * Get the params of a specific relation
-	 * @param String $name
-	 * @return Array
+	 * @param string $name
+	 * @return array
 	 */
 	public function relation($name)
 	{
@@ -748,7 +856,7 @@ class Mapper implements \Iterator
 
 	/**
 	 * Get the table name
-	 * @return String
+	 * @return string
 	 */
 	public function table()
 	{
@@ -758,7 +866,7 @@ class Mapper implements \Iterator
 
 	/**
 	 * Get the columns
-	 * @return Array
+	 * @return array
 	 */
 	public function columns()
 	{
@@ -772,7 +880,7 @@ class Mapper implements \Iterator
 	 * called when getting related records in a record
 	 * or from __call when the relation is needed to put filters on
 	 * 
-	 * @param String $name
+	 * @param string $name
 	 * @return \Base\ORM\Mapper
 	 */
 	protected function mapper($name)
@@ -795,9 +903,8 @@ class Mapper implements \Iterator
 
 
 	/**
-	 * 
-	 * Iterator methods
-	 * 
+	 * Iterator implementation: reset
+	 * unset the iterator
 	 */
 	public function reset()
 	{
@@ -805,6 +912,10 @@ class Mapper implements \Iterator
 	}
 
 
+	/**
+	 * Iterator implementation: rewind
+	 * Call 'all' automatically if no iterator is present
+	 */
 	public function rewind()
 	{
 		if ($this->iterator === null) {
@@ -814,29 +925,45 @@ class Mapper implements \Iterator
 		$this->position = 0;
 	}
 
-
+	
+	/**
+	 * Iterator implementation: current
+	 * @return \Base\ORM\Record
+	 */
 	public function current()
 	{
 		return $this->record($this->current);
 	}
 
-
+	
+	/**
+	 * Iterator implementation: key
+	 * Get the current position of the iterator
+	 * @return int
+	 */
 	public function key()
 	{
 		return $this->position;
 	}
 
-
+	
+	/**
+	 * Iterator implementation: next
+	 */
 	public function next()
 	{
 		$this->current = $this->iterator->fetch(\PDO::FETCH_ASSOC);
 		$this->position++;
 	}
 
-
+	
+	/**
+	 * Iterator implementation: next
+	 * @return boolean
+	 */
 	public function valid()
 	{
-		return $this->current == true;
+		return ($this->current == true);
 	}
 
 }

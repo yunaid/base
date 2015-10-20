@@ -4,8 +4,16 @@ namespace Base;
 
 class CLI
 {
-	// the command passed
+	/**
+	 * The passed command
+	 * @var string 
+	 */
 	protected $command = '';
+	
+	/**
+	 * Arguments
+	 * @var array 
+	 */
 	protected $arguments = [];
 	
 	
@@ -24,12 +32,20 @@ class CLI
 	}
 	
 	
+	/**
+	 * Get arguments
+	 * @return array
+	 */
 	public function params()
 	{
 		return $this->arguments;
 	}
 	
 	
+	/**
+	 * Get command
+	 * @return string
+	 */
 	public function command()
 	{
 		return $this->command;

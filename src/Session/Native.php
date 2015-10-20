@@ -2,10 +2,19 @@
 
 namespace Base\Session;
 
+use \Base\Cookie as Cookie;
+use \Base\Encryption as Encryption;
+
 class Native extends Driver
 {
 	
-	public function __construct($params, $cookie, $encryption = null)
+	/**
+	 * Constructor
+	 * @param array $params
+	 * @param \Base\Cookie $cookie
+	 * @param \Base\Encryptin $encryption
+	 */
+	public function __construct(array $params, Cookie $cookie, Encryption $encryption = null)
 	{
 		// write on shutdown
 		register_shutdown_function([$this, 'write']);
@@ -15,7 +24,6 @@ class Native extends Driver
 		], $this->params, $params);
 			
 			
-
 		$this->cookie = $cookie;
 		$this->encryption = $encryption;
 		
@@ -39,6 +47,10 @@ class Native extends Driver
 	}
 
 
+	/**
+	 * Get data
+	 * @return array
+	 */
 	protected function retrieve()
 	{
 		// return the session data key
@@ -46,12 +58,17 @@ class Native extends Driver
 	}
 
 
-	protected function store($data)
+	/**
+	 * Store data
+	 * @param array $data
+	 */
+	protected function store(array $data)
 	{
 		$_SESSION['data'] = $data;
 		session_write_close();
 	}
 
+	
 	/**
 	 * Reset the session cookie lifetime
 	 */
@@ -65,7 +82,10 @@ class Native extends Driver
 		$this->cookie->set($this->params['name'], session_id(), $this->params['lifetime'], true);
 	}
 	
-
+	
+	/**
+	 * Destroy the session
+	 */
 	public function destroy()
 	{
 		session_destroy();

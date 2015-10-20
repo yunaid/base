@@ -2,7 +2,10 @@
 
 namespace Base\Cache;
 
-class APC
+/**
+ * 
+ */
+class APC implements \Base\Contract\Cache\Adapter
 {
 	/**
 	 * Params
@@ -24,11 +27,8 @@ class APC
 
 
 	/**
-	 * Get a value from cache
-	 * @param string $name
-	 * @param atring|array $default
-	 * @return mixed
-	 */
+	* {@inheritdoc}
+	*/
 	public function get($name, $default = null)
 	{
 		$data = apc_fetch($this->params['prefix'].$name, $success);
@@ -37,12 +37,8 @@ class APC
 
 
 	/**
-	 * Set a value
-	 * @param string $name
-	 * @param string $value
-	 * @param int $lifetime in seconds
-	 * @return mixed
-	 */
+	* {@inheritdoc}
+	*/
 	public function set($name, $value, $lifetime = 3600)
 	{
 		return apc_store($this->params['prefix'].$name, $value, $lifetime);
@@ -50,10 +46,8 @@ class APC
 
 
 	/**
-	 * Delete a value from cache
-	 * Use a wildcard * to remove a group of entries at once
-	 * @param string $name
-	 */
+	* {@inheritdoc}
+	*/
 	public function delete($name = '*')
 	{
 		if (strpos($name, '*') !== strlen($name) - 1) {
