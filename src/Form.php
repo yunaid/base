@@ -112,9 +112,9 @@ class Form
 
 	/**
 	 * Create a new form
-	 * @param type $validation
-	 * @param type $request
-	 * @param type $elementFactory
+	 * @param \Base\Validation $validation
+	 * @param \Base\HTTP\Request $request
+	 * @param \Closure $elementFactory
 	 */
 	public function __construct(Validation $validation, Request $request, \Closure $elementFactory)
 	{

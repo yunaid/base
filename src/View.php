@@ -160,10 +160,11 @@ class View
 		return $this->file;
 	}
 
+	
 	/**
 	 * Set and get blocks, used by engine
-	 * @param string $name
-	 * @param string $value
+	 * @param string $name Name of the block
+	 * @param string $value Contents of the block
 	 * @return null|string
 	 */
 	public function block($name, $value = null)
