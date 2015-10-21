@@ -18,8 +18,7 @@ class File extends \Base\Cache\Adapter
 	 * @var array 
 	 */
 	protected $params = [
-		'path' => '___cache___',
-		'prefix' => ''
+		'path' => null
 	];
 
 
@@ -31,6 +30,11 @@ class File extends \Base\Cache\Adapter
 	public function __construct(array $params)
 	{
 		$this->params = array_merge($this->params, $params);
+		
+		// check path set
+		if ($params['path'] === null) {
+			throw new CacheFileException('No cache path provided');
+		}
 		
 		// get dir
 		$this->dir = new \SplFileInfo($params['path']);
@@ -53,7 +57,7 @@ class File extends \Base\Cache\Adapter
 	public function get($name, $default = null)
 	{
 		// explode on separator
-		$parts = explode('.', str_replace(['/', '\\'], '_', $this->params['prefix'].$name));
+		$parts = explode('.', str_replace(['/', '\\'], '_', $name));
 		// last part is filename
 		$filename = array_pop($parts) . '.cache';
 		// get directory
@@ -114,7 +118,7 @@ class File extends \Base\Cache\Adapter
 	public function set($name, $value, $lifetime = 3600)
 	{
 		// explode on separator
-		$parts = explode('.', str_replace(['/', '\\'], '_', $this->params['prefix'].$name));
+		$parts = explode('.', str_replace(['/', '\\'], '_', $name));
 		// last part is filename
 		$filename = array_pop($parts) . '.cache';
 		// get directory
@@ -148,7 +152,7 @@ class File extends \Base\Cache\Adapter
 	public function delete($name = '*')
 	{
 		// explode on separator
-		$parts = explode($this->params['separator'], $this->params['prefix'].$name);
+		$parts = explode($this->params['separator'], $name);
 		// last part is filename
 		$filename = array_pop($parts);
 		// get file path

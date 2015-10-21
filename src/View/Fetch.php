@@ -6,7 +6,7 @@ class Fetch extends \Base\View\Engine
 {
 	/**
 	 * Class alias.
-	 * We can differntiate between the called class 'Engine' or 'Fetch'
+	 * We can differentiate between the called class 'Engine' or 'Fetch'
 	 * The first will mostly echo output, when fetch is called, it will return it.
 	 * @var string 
 	 */

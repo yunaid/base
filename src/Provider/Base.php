@@ -17,7 +17,9 @@ class Base
 		if(!defined('START')){
 			define('START', microtime(true));
 		}
-			
+		
+		$config = static::config($config);
+		
 		$container->share([
 			'base.cache',
 			'base.cache.adapter',
@@ -230,5 +232,168 @@ class Base
 				);
 			},
 		]);
+	}
+	
+	
+	/**
+	 * Merge supplied config with default one
+	 * @param array $config
+	 * @return array
+	 */
+	protected static function config(array $config = [])
+	{
+		return array_replace_recursive(
+			[
+				'base' => [
+					'container' => [							# Container
+						'class' => '\\Base\\Container'			// Container-class to use 
+					],
+					'provider' => [								# Provider
+						'class' => '\\Base\\Provider\\Base'		// Provider class to use
+					],
+					'loader' => [								# Loader
+						'file' => __DIR__ .'/../Loader.php',	// Location of the loader file
+						'class' => '\\Base\\Loader',			// Loader class to use
+						'autoload' => true,						// Use autoloader of Loader
+						'prefix' => [],							 // Class prefixes
+					],
+					'php' => [									 # PHP settings
+						'timezone' => 'Europe/Amsterdam',
+						'locale' => 'nl_NL.utf-8',
+						'display_errors' => 0,
+						'error_reporting' => E_ALL | E_STRICT
+					],
+				],
+				'cache' => [									# Cache groups
+					'default' => [
+						'adapter' => 'file',					// Choose one of the available adapters
+						'active' => true,						// Actually use this group or not
+						'lifetime' => 3600						// default lifetime
+					],
+				],
+				'cache.adapter' => [							# Cache adapters
+					'apc' => [									// APC adapter
+						'class' => '\\Base\\Cache\\Apc',		// Class to use
+						'params' => [],
+					],
+					'file' => [									// File Adapter
+						'class' => '\\Base\\Cache\\File',		// Class to use
+						'params' => [
+							'path' => null,						// Path to the cache dir
+						]
+					],
+					'memcache' => [								// Memcache adapter
+						'class' => '\\Base\\Cache\\Memcached',	// Class to use
+						'params' => [							// Settings
+							'compression' => false,
+							'servers' => [
+								'local' => [
+									'host' => 'localhost',
+									'port' => 11211,
+									'persistent' => false,
+									'weight' => 1,
+									'timeout' => 1,
+									'retry' => 15,
+									'status' => true,
+								],
+							],
+							'instant_death' => true,
+						]
+					],
+				],
+				'cookie' => [									# Cookie 
+					'salt' => '{cookiesalt}',					// Salt used for validating tampering
+				],
+				'database' => [
+					'mysql' => [
+						'class' => '\\Base\\Database\\Mysql',
+						'params' => [
+							'dsn' => 'mysql:host=[host];dbname=[database]',
+							'username' => '[usr]',
+							'password' => '[pwd]',
+							'options' => [
+								PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'
+							],
+							'profile' => false
+						],
+					],
+					'postgre' => [
+						'class' => '\\Base\\Database\\Postgresql',
+						'params' => [
+							'dsn' => 'mysql:host=[host];dbname=[database]',
+							'username' => '[usr]',
+							'password' => '[pwd]',
+							'options' => [
+								PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'
+							],
+							'profile' => false
+						],
+					],
+					'sqlite' => [
+						'class' => '\\Base\\Database\\Sqlite',
+						'params' => [
+							'dsn' => 'mysql:host=[host];dbname=[database]',
+							'username' => '[usr]',
+							'password' => '[pwd]',
+							'options' => [
+								PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'
+							],
+							'profile' => false
+						],
+					],
+				],
+				'encryption' => [
+					'key' => '__key__',
+					'mode' => MCRYPT_MODE_NOFB,
+					'cipher' => MCRYPT_RIJNDAEL_128
+				],
+				'log' => [
+					'file' => [
+						'class' => '\\Base\\Log\\File',
+						'params' => [
+							'path' => null
+						]
+					]
+				],
+				'schema' => [
+					'path' => [],
+				],
+				'session' => [
+					'native' => [
+						'class' => '\\Base\\Session\\Native',
+						'params' => [
+							'lifetime' => 0,
+							'name' => 'session_1',
+							'encrypt' => true,
+							'path' => null
+						]
+					],
+					'database' => [
+						'class' => '\\Base\\Session\\Database',
+						'database' => 'mysql',
+						'params' => [
+							'lifetime' => 0,
+							'name' => 'session_2',
+							'encrypt' => true,
+							'table' => 'session',
+							'columns' => [
+								'id' => 'id',
+								'updated' => 'updated',
+								'data' => 'data'
+							],
+							'gc' => 1000
+						]
+					],
+				],
+				'view' => [
+					'path' => [],
+					'alias' => [
+						'view' => 'view',
+						'fetch' => 'fetch',
+					]
+				],
+			],
+			$config
+		);
 	}
 }

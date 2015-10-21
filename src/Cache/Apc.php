@@ -4,31 +4,13 @@ namespace Base\Cache;
 
 class APC extends \Base\Cache\Adapter
 {
-	/**
-	 * Params
-	 * @var array 
-	 */
-	protected $params = [
-		'prefix' => ''
-	];
-
 	
-	/**
-	 * Constructor
-	 * @param array $params
-	 */
-	public function __construct(array $params)
-	{
-		$this->params = array_merge($this->params, $params);
-	}
-
-
 	/**
 	* {@inheritdoc}
 	*/
 	public function get($name, $default = null)
 	{
-		$data = apc_fetch($this->params['prefix'].$name, $success);
+		$data = apc_fetch($name, $success);
 		return $success ? $data : $default;
 	}
 
@@ -38,7 +20,7 @@ class APC extends \Base\Cache\Adapter
 	*/
 	public function set($name, $value, $lifetime = 3600)
 	{
-		return apc_store($this->params['prefix'].$name, $value, $lifetime);
+		return apc_store($name, $value, $lifetime);
 	}
 
 
@@ -49,10 +31,10 @@ class APC extends \Base\Cache\Adapter
 	{
 		if (strpos($name, '*') !== strlen($name) - 1) {
 			// delete single key when the last character is not a star
-			apc_delete($this->params['prefix'].$name);
+			apc_delete($name);
 		} else {
 			// last character is a star
-			$name = $this->params['prefix'].rtrim($name, '*');
+			$name = rtrim($name, '*');
 			// loop through everything starting with the given string
 			$names = new \APCIterator('user', '#^' . preg_quote($name) . '#', APC_ITER_KEY, 1);
 			// ... and delete it

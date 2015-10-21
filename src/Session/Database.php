@@ -85,9 +85,19 @@ class Database extends Driver
 
 
 	/**
-	 * Retrieve data from the database
-	 * @return string|boolean
+	 * Garbage collect
 	 */
+	protected function gc()
+	{
+		$this->database->delete($this->params['table'])
+		->where($this->params['columns']['updated'], '<', time() - $this->params['lifetime'])
+		->execute();
+	}
+	
+	
+	/**
+	* {@inheritdoc}
+	*/
 	protected function retrieve()
 	{
 		if($this->row !== null) {
@@ -100,9 +110,8 @@ class Database extends Driver
 
 	
 	/**
-	 * Store data in the database
-	 * @param string $data
-	 */
+	* {@inheritdoc}
+	*/
 	protected function store($data)
 	{
 		if($this->row === null) {
@@ -132,8 +141,8 @@ class Database extends Driver
 	
 	
 	/**
-	 * Reset the cookie lifetime
-	 */
+	* {@inheritdoc}
+	*/
 	public function extend()
 	{
 		$this->cookie->set($this->params['name'], $this->id, $this->params['lifetime']);
@@ -141,8 +150,8 @@ class Database extends Driver
 
 	
 	/**
-	 * Destroy the session
-	 */
+	* {@inheritdoc}
+	*/
 	public function destroy()
 	{
 		$this->database->delete($this->params['table'])
@@ -150,16 +159,5 @@ class Database extends Driver
 		->execute();
 		$this->cookie->delete($this->params['name']);
 		$this->id = null;
-	}
-
-	
-	/**
-	 * Garbage collect
-	 */
-	protected function gc()
-	{
-		$this->database->delete($this->params['table'])
-		->where($this->params['columns']['updated'], '<', time() - $this->params['lifetime'])
-		->execute();
 	}
 }
