@@ -288,6 +288,7 @@ class Form
 		}
 
 		// callable done: add the current elements as a group to the stored elements
+		// use an object that can pass as an element (its has ->type)
 		$elements[] = (object) array_merge($params, [
 			'group' => true,
 			'type' => $type,
@@ -314,61 +315,11 @@ class Form
 		call_user_func_array([$this->validation, 'rule'], func_get_args());
 	}
 
-	
+
 	/**
-	 * Start using form
-	 * If the form was not built, build it
+	 * Check if the form was submitted
+	 * @return boolean
 	 */
-	protected function init()
-	{
-		if ($this->built === false) {
-			// build only once
-			$this->built = true;
-
-			// put hidden field with form id
-			$this->element('form_' . $this->id . '_submitted', 'hidden');
-			$this->value('form_' . $this->id . '_submitted', '1');
-
-			// call the user defined build function
-			if (method_exists($this, 'build')) {
-				$this->build();
-			}
-		}
-	}
-
-	
-	/**
-	 * Process the form
-	 */
-	public function process()
-	{
-		if ($this->built === false) {
-			$this->init();
-		}
-
-		if ($this->processed === false) {
-			// process only once
-			$this->processed = true;
-
-			// check if submitted
-			if ($this->method === 'POST') {
-				$this->submitted = $this->request->post('form_' . $this->id . '_submitted', false) == '1';
-			} else {
-				$this->submitted = $this->request->query('form_' . $this->id . '_submitted', false) == '1';
-			}
-
-			if ($this->submitted) {
-				if ($this->method === 'POST') {
-					$this->values($this->request->post(), true);
-				} else {
-					$this->values($this->request->query(), true);
-				}
-				$this->validate();
-			}
-		}
-	}
-
-
 	public function submitted()
 	{
 		if ($this->processed === false) {
@@ -378,6 +329,10 @@ class Form
 	}
 
 
+	/**
+	 * Check if the validation passes
+	 * @return boolean
+	 */
 	public function valid()
 	{
 		if ($this->processed === false) {
@@ -387,6 +342,10 @@ class Form
 	}
 
 
+	/**
+	 * Get elements
+	 * @return array
+	 */
 	public function elements()
 	{
 		if ($this->built === false) {
@@ -396,6 +355,11 @@ class Form
 	}
 
 
+	/**
+	 * Get the errors for a key or all errors
+	 * @param string|null $key
+	 * @return array
+	 */
 	public function errors($key = null)
 	{
 		if ($this->processed === false) {
@@ -413,6 +377,11 @@ class Form
 	}
 
 
+	/**
+	 * Check if an element can contain multiple values
+	 * @param string $key
+	 * @return boolean
+	 */
 	public function multiple($key)
 	{
 		if ($this->built === false) {
@@ -426,6 +395,11 @@ class Form
 	}
 
 
+	/**
+	 * Check if element is part of a set
+	 * @param string $key
+	 * @return boolean
+	 */
 	public function set($key)
 	{
 		if ($this->built === false) {
@@ -439,6 +413,11 @@ class Form
 	}
 
 
+	/**
+	 * Check if element is required
+	 * @param string $key
+	 * @return boolean
+	 */
 	public function required($key)
 	{
 		if ($this->built === false) {
@@ -451,11 +430,17 @@ class Form
 		}
 	}
 
-
+	
+	/**
+	 * Get or set the values
+	 * @param array|null $values
+	 * @param boolean $complete Use defaults or '' to fill up non-supplied values
+	 * @return array|void
+	 */
 	public function values($values = null, $complete = false)
 	{
 		if ($values === null) {
-
+			// get values
 			if ($this->processed === false) {
 				$this->process();
 			}
@@ -472,7 +457,7 @@ class Form
 			}
 			return $result;
 		} else {
-
+			// set values
 			if ($this->built === false) {
 				$this->init();
 			}
@@ -483,7 +468,6 @@ class Form
 					$this->value($key, $values[$key]);
 				} elseif ($complete) {
 					// force values on all defined fields
-
 					if (is_array($field['keys'])) {
 						// create a compound element from provied and default values
 						$value = [];
@@ -513,13 +497,19 @@ class Form
 	}
 
 
+	/**
+	 * Get or set a value
+	 * @param string $key
+	 * @param null|string|int|array $value
+	 * @return string|array|void
+	 */
 	public function value($key, $value = null)
 	{
 		if ($value === null) {
+			// get value
 			if ($this->processed === false) {
 				$this->process();
 			}
-
 			if (isset($this->values[$key])) {
 				// just return the value
 				return $this->values[$key];
@@ -547,6 +537,7 @@ class Form
 					$this->values[$key] = $value;
 				}
 			} else {
+				// search for a subkey
 				foreach ($this->fields as $superkey => $field) {
 					if (is_array($field['keys']) && in_array($key, $field['keys'])) {
 						$this->values[$superkey][$key] = $value;
@@ -555,8 +546,65 @@ class Form
 			}
 		}
 	}
+	
+	
+	/**
+	 * Start using form
+	 * If the form was not built, build it
+	 */
+	protected function init()
+	{
+		if ($this->built === false) {
+			// build only once
+			$this->built = true;
 
+			// put hidden field with form id
+			$this->element('form_' . $this->id . '_submitted', 'hidden');
+			$this->value('form_' . $this->id . '_submitted', '1');
 
+			// call the user defined build function
+			if (method_exists($this, 'build')) {
+				$this->build();
+			}
+		}
+	}
+
+	
+	/**
+	 * Process the form
+	 */
+	protected function process()
+	{
+		if ($this->built === false) {
+			$this->init();
+		}
+
+		if ($this->processed === false) {
+			// process only once
+			$this->processed = true;
+
+			// check if submitted
+			if ($this->method === 'POST') {
+				$this->submitted = $this->request->post('form_' . $this->id . '_submitted', false) == '1';
+			} else {
+				$this->submitted = $this->request->query('form_' . $this->id . '_submitted', false) == '1';
+			}
+
+			if ($this->submitted) {
+				if ($this->method === 'POST') {
+					$this->values($this->request->post(), true);
+				} else {
+					$this->values($this->request->query(), true);
+				}
+				$this->validate();
+			}
+		}
+	}
+
+	
+	/**
+	 * Validate the form
+	 */
 	protected function validate()
 	{
 		if ($this->processed === false) {
@@ -564,5 +612,4 @@ class Form
 		}
 		$this->valid = $this->validation->validate($this->values);
 	}
-
 }
