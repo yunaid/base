@@ -255,7 +255,9 @@ class Base
 						'file' => __DIR__ .'/../Loader.php',	// Location of the loader file
 						'class' => '\\Base\\Loader',			// Loader class to use
 						'autoload' => true,						// Use autoloader of Loader
-						'prefix' => [],							 // Class prefixes
+						'prefix' => [
+							'Base\\' => __DIR__ .'/../',		 // Class prefixes
+						],							
 					],
 					'php' => [									 # PHP settings
 						'timezone' => 'Europe/Amsterdam',
