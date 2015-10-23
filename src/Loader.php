@@ -173,7 +173,7 @@ class Loader {
 	public function find($file, $path = [], $ext = 'php', $all = false) 
 	{
 		// force array
-		$paths =  (array) $path;
+		$paths = (array) $path;
 
 		// try to get hotcached path
 		$key = implode(';', $paths) . '_' . $file . '_' . $ext . '_' . ($all ? 'all' : 'first');

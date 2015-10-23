@@ -270,7 +270,7 @@ class Container
 					$instance = $definition($this, $args[0], $args[1], $args[2]);
 					break;
 				default:
-					array_unshift($this, $args);
+					array_unshift($args, $this);
 					$instance = call_user_func_array($definition, $args);
 			}
 		} else {

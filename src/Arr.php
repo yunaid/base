@@ -5,7 +5,10 @@ namespace Base;
 class Arr
 {
 
-	// the data array
+	/**
+	 * Array with data
+	 * @var array 
+	 */
 	protected $data = [];
 
 	/**
@@ -18,6 +21,30 @@ class Arr
 	}
 
 
+	/**
+	 * Get or set data
+	 * @param array|null $data
+	 * @return array|void
+	 */
+	public function data(array $data = null)
+	{
+		if($data === null) {
+			return $this->data;
+		} else {
+			$this->data = $data;
+		}
+	}
+	
+	
+	/**
+	 * Alias for ->data(null) or ->get(null)
+	 * @return array
+	 */
+	public function flat()
+	{
+		return $this->data;
+	}
+	
 	/**
 	 * Get a var or the default value
 	 * 
@@ -57,7 +84,7 @@ class Arr
 	 * 
 	 * @param string|array $path
 	 * @param string $default
-	 * @return string
+	 * @return string|array
 	 */
 	public function get($path = null, $default = null)
 	{
@@ -130,15 +157,4 @@ class Arr
 			}
 		}
 	}
-
-
-	/**
-	 * Alias for ::get(null)
-	 * @return array
-	 */
-	public function flat()
-	{
-		return $this->data;
-	}
-
 }

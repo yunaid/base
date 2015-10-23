@@ -38,7 +38,6 @@ class Base
 			$loader->prefix($config['base']['loader']['prefix']);
 			$loader->auto();
 		}
-
 		// create the container
 		$this->container = new $config['base']['container']['class']();
 
@@ -54,6 +53,7 @@ class Base
 	 */
 	public function providers(array $providers)
 	{
+		
 		foreach ($providers as $provider) {
 			call_user_func([$provider, 'register'], $this->container);
 		}
@@ -76,6 +76,7 @@ class Base
 	 */
 	public function http()
 	{
+		
 		// get function from the router
 		// this function is defined with the route
 		// if there is no function defined, a controller will be used
@@ -84,7 +85,6 @@ class Base
 		// get request & response
 		$request = $this->container->get('base.http.request');
 		$response = $this->container->get('base.http.response');
-
 
 		if (is_object($function) && method_exists($function, '__invoke')) {
 			// execute closure

@@ -33,6 +33,20 @@ class ArrTest extends PHPUnit_Framework_TestCase
 	}
 	
 	
+	public function testDataGetterSetter()
+	{
+		$arr = $this->make([]);
+		
+		$arr->data([
+			'foo' => [
+				'bar' => 'val1'
+			]
+		]);
+		$this->assertEquals(['foo' => ['bar' => 'val1']], $arr->data());
+	}
+	
+	
+	
 	public function testComplicatedGet()
 	{
 		$data = [
