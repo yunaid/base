@@ -20,24 +20,22 @@ class Reader
 		$this->cache = $cache;
 	}
 
-
-	public function read($resource, $as = null)
+	
+	public function get($resource)
 	{
-		if($as !== null){
-			$name = $as;
-		} elseif(is_string($resource)){
+		if(is_string($resource)){
 			$name = $resource;
 		} else {
-			$name = crc32(implode('_', (array) $resource));
+			$name = abs(crc32(implode('_', (array) $resource)));
 		}
-		
+
 		if(!isset($this->data[$name])){
 			if($this->cache !== null && $data = $this->cache->get($name)) {
 				// result from cache
 				$this->data[$name] = $data;
 			} else {
+				// load resources
 				$resources = (array) $resource;
-				
 				// load all paths
 				$loaded = [];
 				foreach ($resources as $resource) {

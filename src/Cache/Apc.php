@@ -10,7 +10,7 @@ class APC extends \Base\Cache\Adapter
 	*/
 	public function get($name, $default = null)
 	{
-		$data = apc_fetch($name, $success);
+		$data = \apc_fetch($name, $success);
 		return $success ? $data : $default;
 	}
 
@@ -20,7 +20,7 @@ class APC extends \Base\Cache\Adapter
 	*/
 	public function set($name, $value, $lifetime = 3600)
 	{
-		return apc_store($name, $value, $lifetime);
+		return \apc_store($name, $value, $lifetime);
 	}
 
 
@@ -31,7 +31,7 @@ class APC extends \Base\Cache\Adapter
 	{
 		if (strpos($name, '*') !== strlen($name) - 1) {
 			// delete single key when the last character is not a star
-			apc_delete($name);
+			\apc_delete($name);
 		} else {
 			// last character is a star
 			$name = rtrim($name, '*');
@@ -39,7 +39,7 @@ class APC extends \Base\Cache\Adapter
 			$names = new \APCIterator('user', '#^' . preg_quote($name) . '#', APC_ITER_KEY, 1);
 			// ... and delete it
 			foreach ($names as $found) {
-				apc_delete($found['key']);
+				\apc_delete($found['key']);
 			}
 		}
 	}

@@ -41,7 +41,7 @@ class Base
 		])->group([
 			'base.cache' => key($config['cache']),
 			'base.cache.adapter' => key($config['cache.adapter']),
-			'base.config' => 'base',
+			'base.config' => 'default',
 			'base.database' => key($config['database']),
 			'base.log' => key($config['log']),
 			'base.reader' => 'default',
@@ -51,7 +51,7 @@ class Base
 				return new \Base\Arr($data);
 			},
 			'base.cache' => function($container, $name, $adapter = null)  {
-				$config = $container->get('base.config')->get(['cache', $name ], null);
+				$config = $container->get('base.config')->get(['cache', $name ], []);
 				if($config) {
 					$adapter = $container->get('base.cache.adapter', $config['adapter']);
 				} else {
@@ -71,16 +71,22 @@ class Base
 			'base.command' => function($container, $class) {
 				return new $class($container);
 			},
-			'base.config' => function($container, $name, $resource = []) use ($config){
-				if($name === 'base') {
+			'base.config' => function($container, $name, $resource = null, $cache = null) use ($config){
+				if($name === 'default') {
 					return new \Base\Arr($config);
 				} else {
-					return new \Base\Arr($container->get(
+					$reader = $container->get(
 						'base.reader', 
 						'config',
 						$config['config']['path'], 
-						$config['config']['cache']
-					)->read($resource, $name));
+						($cache !== null ? $cache : $config['config']['cache'])
+					);
+					if($resource) {
+						$data = $reader->get($resource);
+					} else {
+						$data = $reader->get($name);
+					}
+					return new \Base\Arr($data);
 				}
 			},
 			'base.console' => function($container) {
