@@ -75,18 +75,13 @@ class Base
 				if($name === 'default') {
 					return new \Base\Arr($config);
 				} else {
-					$reader = $container->get(
-						'base.reader', 
-						'config',
-						$config['config']['path'], 
-						($cache !== null ? $cache : $config['config']['cache'])
+					return new \Base\Config(
+						$name,
+						$container->get('base.reader', 'config', $config['config']['path']),
+						new \Base\Arr(),
+						$resource,
+						$container->get('base.cache', $cache !== null ? $cache : $config['config']['cache'])
 					);
-					if($resource) {
-						$data = $reader->get($resource);
-					} else {
-						$data = $reader->get($name);
-					}
-					return new \Base\Arr($data);
 				}
 			},
 			'base.console' => function($container) {
@@ -203,13 +198,9 @@ class Base
 			'base.profile' => function($container) {
 				return new \Base\Profile(START);
 			},
-			'base.reader' => function($container, $name, $path, $cache = null) {
-				if($cache !== null){
-					$cache = $container->get('base.cache', $cache);
-				}
+			'base.reader' => function($container, $name, $path) {
 				return new \Base\Reader (
-					$container->get('base.loader')->finder($path),
-					$cache
+					$container->get('base.loader')->finder($path)
 				);
 			},
 			'base.router' => function($container) {

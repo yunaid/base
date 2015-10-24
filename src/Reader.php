@@ -2,68 +2,57 @@
 
 namespace Base;
 
-use \Base\Cache;
-use \Base\Arr;
-
 class Reader
 {
-
+	/**
+	 * File finder
+	 * @var \Closure 
+	 */
 	protected $finder = null;
 
-	protected $cache = null;
-	
-	protected $data = [];
-	
-	public function __construct(\Closure $finder, Cache $cache = null)
+	/**
+	 * Create a reader
+	 * @param \Closure $finder
+	 */
+	public function __construct(\Closure $finder)
 	{
 		$this->finder = $finder;
-		$this->cache = $cache;
 	}
 
 	
+	/**
+	 * Get a resource
+	 * @param string|array $resource
+	 * @return array
+	 */
 	public function get($resource)
 	{
-		if(is_string($resource)){
-			$name = $resource;
-		} else {
-			$name = abs(crc32(implode('_', (array) $resource)));
+		// cast to array
+		$resources = (array) $resource;
+
+		// load all paths
+		$loaded = [];
+		foreach ($resources as $resource) {
+			$loaded[] = $this->load($resource);
 		}
+		
+		// merge them
+		$data = $this->merge($loaded);
 
-		if(!isset($this->data[$name])){
-			if($this->cache !== null && $data = $this->cache->get($name)) {
-				// result from cache
-				$this->data[$name] = $data;
-			} else {
-				// load resources
-				$resources = (array) $resource;
-				// load all paths
-				$loaded = [];
-				foreach ($resources as $resource) {
-					$loaded[] = $this->load($resource);
-				}
-
-				// merge them
-				$data = $this->merge($loaded);
-
-				// clean up stray objects
-				$data = $this->clean($data);
-				
-				// cache data
-				if($this->cache !== null){
-					$this->cache->set($name, $data);
-				}
-
-				// store it locally
-				$this->data[$name] = $data;
+		// clean up stray objects
+		array_walk_recursive($data, function(& $element) {
+			if (is_object($element)) {
+				$element = (array) $element;
 			}
-		}
-		return $this->data[$name];
+		});
+		
+		return $data;
 	}
 	
 
 	/**
-	 * Load cascading paths
-	 * @param Array $paths
+	 * Load a resource
+	 * @param array $resource
 	 * @return Array
 	 */
 	protected function load($resource)
@@ -78,9 +67,9 @@ class Reader
 
 
 	/**
-	 * Merge multiple arrys
-	 * @param Array $parts
-	 * @return Array
+	 * Merge multiple arrays
+	 * @param array $parts
+	 * @return array
 	 */
 	protected function merge($parts)
 	{
@@ -99,21 +88,5 @@ class Reader
 			}
 			return $data;
 		}
-	}
-
-
-	/**
-	 * Clean of remaing (object)'s in a data array
-	 * @param array $data
-	 * @return array
-	 */
-	protected function clean($data)
-	{
-		array_walk_recursive($data, function(& $element) {
-			if (is_object($element)) {
-				$element = (array) $element;
-			}
-		});
-		return $data;
 	}
 }
