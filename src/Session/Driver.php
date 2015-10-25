@@ -19,7 +19,7 @@ abstract class Driver
 	 * Data to store
 	 * @var array 
 	 */
-	protected $data = [];
+	protected $data = null;
 	
 	/**
 	 * Encryption object
