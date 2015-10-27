@@ -9,7 +9,7 @@ use \Base\Cache;
 class Config
 {
 	/**
-	 * Name of the config file
+	 * Name of the config file / resource
 	 * @var string 
 	 */
 	protected $name = null;
