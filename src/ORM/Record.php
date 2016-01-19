@@ -161,10 +161,9 @@ class Record
 			if(in_array($name, $this->methods)) {
 				return call_user_func_array([$this->mapper, 'method'], [$name, $this, $args]);
 			}
-			
 			if (in_array($name, $this->relations)) {
 				$amount = isset($args[0]) ? $args[0] : null;
-				$skip = isset($args[1]) ? $args[1] : 1;
+				$skip = isset($args[1]) ? $args[1] : 0;
 				$sort = isset($args[2]) ? $args[2] : array();
 				return $this->mapper->related($name, $this, $amount, $skip, $sort);
 			}

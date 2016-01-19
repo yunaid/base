@@ -393,7 +393,6 @@ class Mapper implements \Iterator
 	{
 		// create a query
 		$query = $this->query();
-
 		if ($this->origin !== null && $record !== null) {
 			$relation = $this->origin->relation($name);
 			switch ($relation[1]) {
@@ -751,12 +750,6 @@ class Mapper implements \Iterator
 	 */
 	public function record(array $data = [])
 	{
-		foreach($this->params['columns'] as $name => $type){
-			if(isset($data[$name])){
-				
-			}
-		}
-		
 		foreach ($this->params['relations'] as $name => $relation) {
 			if ($relation[1] === 'many' || $relation[1] === 'pivot' || $relation[1] === 'set' || $relation[1] === 'one') {
 				if (isset($data[$relation[0]])) {
@@ -787,12 +780,16 @@ class Mapper implements \Iterator
 	 * @param array $args
 	 * @return mixed|null
 	 */
-	public function method($name, $recordOrCallable,array  $args = array())
+	public function method($name, $recordOrCallable, array  $args = array())
 	{
-		if(is_object($definition) && method_exists($recordOrCallable, '__invoke')){
+		if(
+			(is_object($recordOrCallable) && method_exists($recordOrCallable, '__invoke'))
+			|| 
+			(is_array($recordOrCallable) && count($recordOrCallable) == 2 && is_callable($recordOrCallable))
+		){
 			// define a method
 			$this->methods[$name] = $recordOrCallable;
-		} elseif(isset($this->methods[$name])) {
+		} elseif(isset($this->methods[$name]) && $recordOrCallable instanceof Record) {
 			// call a method
 			switch (count($args)) {
 				case 0:

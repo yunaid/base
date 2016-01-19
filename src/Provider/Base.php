@@ -17,7 +17,6 @@ class Base
 		if(!defined('START')){
 			define('START', microtime(true));
 		}
-
 		$container->share([
 			'base.cache',
 			'base.cache.adapter',

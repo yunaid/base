@@ -3,6 +3,15 @@ namespace Base;
 
 class ContainerException extends \Exception{};
 
+/**
+ * Container that resolves dependencies.
+ * 
+ * Definitions have to be defined through the set() method
+ * 
+ * Definitions can be resolved using the get() method
+ * 
+ * 
+ */
 class Container
 {
 	/**

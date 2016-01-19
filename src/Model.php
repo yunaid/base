@@ -22,7 +22,7 @@ class Model
 	
 	/**
 	 * Database object
-	 * @var type 
+	 * @var \Base\Database 
 	 */
 	protected $database = null;
 	
@@ -37,6 +37,12 @@ class Model
 	 * @var \Closure 
 	 */
 	protected $entityFactory = null;
+	
+	/**
+	 * Methods that need to be registered with the mapper so they are available in records
+	 * @var array 
+	 */
+	protected $presenters = [];
 	
 	
 	/**
@@ -59,6 +65,7 @@ class Model
 	
 	/**
 	 * Get a new mapper
+	 * Register all methods from $presenters array
 	 * @param string $name
 	 * @return \Base\ORM\Mapper
 	 */
@@ -67,7 +74,13 @@ class Model
 		if($name === null){
 			$name = $this->name;
 		}
-		return $this->mapperFactory->__invoke($name);
+		$mapper = $this->mapperFactory->__invoke($name);
+		foreach($this->presenters as $name){
+			if(method_exists($this, $name)) {
+				$mapper->method($name, [$this, $name]);
+			}
+		}
+		return $mapper;
 	}
 	
 	
