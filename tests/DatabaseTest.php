@@ -30,12 +30,13 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
 			'qux' => $database->raw('raw'),
 		])
 		->values([
-			'bar' => 'boo'
+			'bar' => 'boo',
+			'arr' => [1,2]
 		])
 		->compile();
 		
-		$this->assertEquals('INSERT INTO `f``o\'o` (`bar`, `qux`) VALUES (?, raw)', $query);
-		$this->assertEquals(['boo'], $params);
+		$this->assertEquals('INSERT INTO `f``o\'o` (`bar`, `qux`, `arr`) VALUES (?, raw, ?)', $query);
+		$this->assertEquals(['boo', '1,2'], $params);
 	}
 	
 	
@@ -71,13 +72,14 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
 		])
 		->values([
 			'foo' => 'boo',
-			'empty' => null
+			'empty' => null,
+			'arr' => [1,2]
 		])
-		->where('id', 1)
+		->where('id', 3)
 		->compile();
 		
-		$this->assertEquals('UPDATE `foo` SET `foo` = ?, `baz` = ?, `empty` = DEFAULT(`empty`) WHERE `id` = ?', $query);
-		$this->assertEquals(['boo', 'qux', 1], $params);
+		$this->assertEquals('UPDATE `foo` SET `foo` = ?, `baz` = ?, `empty` = DEFAULT(`empty`), `arr` = ? WHERE `id` = ?', $query);
+		$this->assertEquals(['boo', 'qux', '1,2', 3], $params);
 	}
 	
 	

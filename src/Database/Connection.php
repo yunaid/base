@@ -89,6 +89,7 @@ class Connection
 	 */
 	public function execute($query, array $params, $type = null, $id = 'id')
 	{
+
 		$this->connect();
 		$statement = $this->connection->prepare($query);
 

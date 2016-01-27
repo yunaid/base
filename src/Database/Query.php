@@ -568,12 +568,9 @@ class Query
 
 		$separator = '';
 		foreach ($this->values as $identifier => $value) {
-			if ($value instanceof \Base\Database\Raw) {
-				$query .= $separator . $value->expression();
-			} else {
-				$params [] = $value;
-				$query .= $separator . '?';
-			}
+			list($valueQuery, $valueParams) = $this->compileValue($value, $identifier);
+			$params = array_merge($params, $valueParams);
+			$query .= $separator.$valueQuery;
 			$separator = ', ';
 		}
 
@@ -774,14 +771,11 @@ class Query
 		$separator = '';
 		foreach ($this->values as $identifier => $value) {
 			$query .= $separator . $this->quoteIdentifier($identifier) . ' = ';
-			if ($value instanceof \Base\Database\Raw) {
-				$query .= $value->expression();
-			} elseif ($value === null) {
-				$query .= 'DEFAULT(' . $this->quoteIdentifier($identifier) . ')';
-			} else {
-				$params [] = $value;
-				$query .= '?';
-			}
+			list($valueQuery, $valueParams) = $this->compileValue($value, $identifier);
+			$params = array_merge($params, $valueParams);
+			
+			
+			$query .= $valueQuery;
 			$separator = ', ';
 		}
 
@@ -790,9 +784,10 @@ class Query
 			$query.= ' WHERE ' . $whereQuery;
 			$params = array_merge($params, $whereParams);
 		}
+
 		return [$query, $params];
 	}
-
+	
 
 	/**
 	 * Compile a delete query
@@ -878,6 +873,32 @@ class Query
 		return [$query, $params];
 	}
 
+
+	/**
+	 * Compile a value to a writable sql format
+	 * @param mixed $value
+	 * @param string|null $identifier Pass a string to set a default value for null values
+	 * @return array Two part array, with a query part and a params part
+	 */
+	protected function compileValue($value, $identifier = null)
+	{
+		if ($value instanceof \Base\Database\Raw) {
+			return [$value->expression(), []];
+		} elseif ($value instanceof \Base\Database\Query) {
+			list($query, $params) = $value->compile();
+			return ['(' . $query . ')', $params];
+		} elseif ($value === null && $identifier !== null) {
+			return ['DEFAULT(' . $this->quoteIdentifier($identifier) . ')', []];
+		} elseif ($value === null) {
+			return ['NULL', []];
+		} elseif (is_array($value)){
+			return ['?', [implode(',', $value)]];
+		} else {
+			return ['?', [$value]];
+		}
+	}
+	
+	
 	/**
 	 * Quote a tablename
 	 * replace a quote character in the tablename with a double quote character
@@ -908,7 +929,7 @@ class Query
 		return implode('.', $quoted);
 	}
 
-
+	
 	/**
 	 * Execute the query
 	 * With insert queries, pass in the names of the id-field, to get the last-inserted id
