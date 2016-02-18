@@ -31,17 +31,6 @@ class CLI
 		$this->arguments = $arguments;
 	}
 	
-	
-	/**
-	 * Get arguments
-	 * @return array
-	 */
-	public function params()
-	{
-		return $this->arguments;
-	}
-	
-	
 	/**
 	 * Get command
 	 * @return string
@@ -50,4 +39,27 @@ class CLI
 	{
 		return $this->command;
 	}
+
+	// get arguments
+	public function arguments()
+	{
+		// TODO get ecerything before - and --
+		return $this->arguments;
+	}
+	
+	
+	public function options()
+	{
+		// TODO: get options with single -
+		return [];
+	}
+	
+	
+	public function option()
+	{
+		// TODO: get options with single -
+		return [];
+	}
+	
+
 }

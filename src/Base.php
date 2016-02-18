@@ -149,8 +149,9 @@ class Base
 	public function cli()
 	{
 		$cli = $this->container->get('base.cli');
-		$command = $this->container->get('base.command', $cli->command());
-		return $command($cli->params());
+		if($class = $cli->command()){
+			$command = $this->container->get('base.command', $class);
+			$command->execute($cli);
+		}
 	}
-
 }

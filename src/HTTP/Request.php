@@ -51,6 +51,11 @@ class Request
 	 */
 	public function __construct(array $server, array $get,  Arr $post)
 	{
+		// this is a cli request, dont do all of this
+		if(php_sapi_name() === 'cli'){
+			return;
+		}
+		
 		// save globals
 		$this->server = $server;
 		$this->get = $get;

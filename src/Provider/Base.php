@@ -70,7 +70,7 @@ class Base
 			'base.command' => function($container, $class) {
 				return new $class($container);
 			},
-			'base.config' => function($container, $name, $resource = null, $cache = null) use ($config){
+			'base.config' => function($container, $name = 'default', $resource = null, $cache = null) use ($config){
 				if($name === 'default') {
 					return new \Base\Arr($config);
 				} else {
