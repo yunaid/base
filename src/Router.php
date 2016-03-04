@@ -66,49 +66,153 @@ class Router
 		$this->request = $request;
 	}
 
-
+	/**
+	 * Create a route that only matches 'get' requests
+	 * @param string $pattern
+	 * @param string|array|\Closure $optionsOrCallback
+	 * @param string $name
+	 */
+	public function get($pattern, $optionsOrCallback, $name = null)
+	{
+		$this->route($pattern, $optionsOrCallback, $name, ['get']);
+	}
+	
+	
+	/**
+	 * Create a route that only matches 'post' requests
+	 * @param string $pattern
+	 * @param string|array|\Closure $optionsOrCallback
+	 * @param string $name
+	 */
+	public function post($pattern, $optionsOrCallback, $name = null)
+	{
+		$this->route($pattern, $optionsOrCallback, $name, ['post']);
+	}
+	
+	
+	/**
+	 * Create a route that only matches 'put' requests
+	 * @param string $pattern
+	 * @param string|array|\Closure $optionsOrCallback
+	 * @param string $name
+	 */
+	public function put($pattern, $optionsOrCallback, $name = null)
+	{
+		$this->route($pattern, $optionsOrCallback, $name, ['put']);
+	}
+	
+	
+	/**
+	 * Create a route that only matches 'delete' requests
+	 * @param string $pattern
+	 * @param string|array|\Closure $optionsOrCallback
+	 * @param string $name
+	 */
+	public function delete($pattern, $optionsOrCallback, $name = null)
+	{
+		$this->route($pattern, $optionsOrCallback, $name, ['delete']);
+	}
+	
+	
+	/**
+	 * Create a route that matches any request-type
+	 * @param string $pattern
+	 * @param string|array|\Closure $optionsOrCallback
+	 * @param string $name
+	 */
+	public function any($pattern, $optionsOrCallback, $name = null)
+	{
+		$this->route($pattern, $optionsOrCallback, $name, null);
+	}
+	
+	
+	/**
+	 * Create a route that matches given methods
+	 * @param string $pattern
+	 * @param string|array|\Closure $optionsOrCallback
+	 * @param string $name
+	 */
+	public function methods(array $methods, $pattern, $optionsOrCallback, $name = null)
+	{
+		$this->route($pattern, $optionsOrCallback, $name, $methods);
+	}
+	
+	
+	
 	/**
 	 * Add a route or set the default route
 	 * 
-	 * $name can be used to target a specific route when buildign an url
-	 * $patter is the pattern to match
-	 * $options can container the following
-	 *	'conditions': an array with regexes for params in the uri
-	 *	'defaults': an array with default values for missing optional params in the uri
+	 * $patternOrName can be the pattern to match when defining a route
+	 * $patternOrName can be the name of the default route to use, when all other arguments are omitted
+	 * 
+	 * $optionsOrCallback can target a controller + action when a controller@action string is passed
+	 * $optionsOrCallback can be a callback function that will be executed
+	 * $optionsOrCallback can be an array with the following options
+	 * 
+	 *	'match': an array with regexes for params in the uri
+	 *	'defaults': an array with default values for missing optional params in the uri. Use 'controller' and 'action' to point to an action
 	 *	'parse': a closure that will be run after an uri is matched. $params and $request are arguments. Return false move on to next route
 	 *  'build': a closure that will be run before an uri is built from params. $params is the argument
+	 *  'methods': an array with allowed http methods
 	 * 
-	 * $function is a callback funtion that is provided with a request and response. 
-	 * If not $function is provided, a controller/action combination is used, based on  'controller' and 'action' params
+	 * $name is the name to use when building an url with the route
 	 * 
+	 * 
+	 * @param string $patternOrName
+	 * @param string|array|\Closure $optionsOrCallback 
 	 * @param string $name
-	 * @param string $pattern
-	 * @param array $options
-	 * @param Callable $function
-	 * @return \Base\Router
+	 * @param array $methods
 	 */
-	public function route($name, $pattern = null, array $options = [], \Closure $function = null)
+	public function route($patternOrName, $optionsOrCallback = null, $name = null, $methods = null)
 	{
-		if ($pattern === null) {
+		if ($optionsOrCallback === null) {
 			// dont add a route, instead, set the current default route to use
-			$this->route = $name;
+			$this->route = $patternOrName;
 		} else {
-			// add/replace the route
-			$this->routes[$name] = array_merge(
-				[
-					'pattern' => $pattern,
-					'function' => $function,
-					'conditions' => [],
-					'defaults' => [],
-					'parse' => null,
-					'build' => null,
-				], $options
-			);
+			$options = [
+				'pattern' => $patternOrName,
+				'callback' => null,
+				'conditions' => [],
+				'defaults' => [],
+				'parse' => null,
+				'build' => null,
+				'name' => $name,
+				'methods' => null
+			];
+			
+			if(is_string($methods)){
+				$methods = [strtolower($methods)];
+			} elseif(is_array($methods)){
+				$methods = array_map('strtolower', $methods);
+			} else {
+				$methods = null;
+			}
+			
+			$options['methods'] = $methods;
+			
+			if(is_array($optionsOrCallback)) {
+				$options = array_merge($options, $optionsOrCallback);
+			} elseif(is_string($optionsOrCallback)) {			
+				$parts = explode('@', $optionsOrCallback);
+				if(isset($parts[0])){
+					$options['defaults']['controller'] = $parts[0];
+				}
+				if(isset($parts[1])){
+					$options['defaults']['action'] = $parts[1];
+				}
+			} else {
+				$options['callback'] = $optionsOrCallback;
+			}
+			
+			if(is_string($options['name'])) {
+				$this->routes[$options['name']] = $options;
+			} else {
+				$this->routes[] = $options;
+			}
 		}
-		return $this;
 	}
-
-
+	
+	
 	/**
 	 * Add a parses callback
 	 * @param Callable $parse
@@ -153,29 +257,31 @@ class Router
 	{
 		foreach ($this->routes as $name => $route) {
 			// check if a route matches: it will return params
-			if ($params = $this->params($route['pattern'], $this->request->uri, $route['conditions'], $route['defaults'])) {
-				// filter params
-				if (is_object($route['parse']) && method_exists($route['parse'], '__invoke')) {
-					$params = $route['parse']($params, $this->request);
-					if ($params === false) {
-						continue;
+			if($route['methods'] === null || ( is_array($route['methods']) && in_array($this->request->method, $route['methods'] ))) {
+				if ($params = $this->params($route['pattern'], $this->request->uri, $route['conditions'], $route['defaults'])) {
+					// filter params
+					if (is_object($route['parse']) && method_exists($route['parse'], '__invoke')) {
+						$params = $route['parse']($params, $this->request);
+						if ($params === false) {
+							continue;
+						}
 					}
-				}
 
-				// run parse callbacks
-				foreach ($this->parse as $parse) {
-					$params = $parse($params, $this->request);
-					if ($params === false) {
-						continue;
+					// run parse callbacks
+					foreach ($this->parse as $parse) {
+						$params = $parse($params, $this->request);
+						if ($params === false) {
+							continue;
+						}
 					}
+
+					// still here: this is the route to use
+					// set the params in the request so they can be used later
+					$this->request->params($params);
+
+					// return the command for this route
+					return $route['callback'];
 				}
-
-				// still here: this is the route to use
-				// set the params in the request so they can be used later
-				$this->request->params($params);
-
-				// return the command for this route
-				return $route['function'];
 			}
 		}
 		return false;
@@ -205,12 +311,8 @@ class Router
 	 * Pass true to get the current url with querystring
 	 * Pass a string that was defined with 'set' to get a predefined url
 	 * Pass '/' to get the current url base
-	 * Pass Foo@bar:baz to build an url with controller Foo, action bar, id baz
-	 * Pass Foo@bar:baz, [] to build with additional params
-	 * Pass [] to build from params
-	 * Pass Foo@bar:baz, route to build with route
-	 * Pass Foo@bar:baz, [], route to build with route and params
-	 * Pass [], route to build from params with route
+	 * Pass routename, [] to build route from params
+	 * Pass [] to build from params with default route
 	 * 
 	 * @return string
 	 * @throws \Base\RouterException
@@ -231,36 +333,17 @@ class Router
 		} elseif ($args[0] === '/') {
 			// return current url base
 			return $this->request->base;
-		} elseif (is_string($args[0])) {
-			// extract Controller / action / id from string
-			$parts = [];
-			preg_match('/([^\@]*)\@?([^\:]*)\:*(.*)/', $args[0], $parts);
-			$params = [
-				'controller' => $parts[1],
-				'action' => $parts[2],
-				'id' => $parts[3],
-			];
+		} elseif (is_string($args[0]) && isset($this->routes[$args[0]])) {
+			$route = $args[0];
+			$params = isset($args[1]) ? $args[1] : [];
 		} elseif (is_array($args[0])) {
-			// params given
+			$route = null;
 			$params = $args[0];
 		} else {
-			// no extra params
+			$route = null;
 			$params = [];
 		}
-
-		if (isset($args[1]) && is_array($args[1])) {
-			$params = array_merge($params, $args[1]);
-			if (isset($args[2])) {
-				$route = $args[2];
-			} else {
-				$route = null;
-			}
-		} elseif (isset($args[1]) && is_string($args[1])) {
-			$route = $args[1];
-		} else {
-			$route = null;
-		}
-
+		
 		// get route
 		if ($route === null) {
 			if ($this->route === null) {
@@ -268,7 +351,8 @@ class Router
 			} else {
 				$route = $this->route;
 			}
-		}
+		} 
+		
 		if (!isset($this->routes[$route])) {
 			throw new RouterException('provided route ' . $route . ' is not defined');
 		}
@@ -300,9 +384,18 @@ class Router
 			$request = $this->request->data();
 			$protocol = isset($params['protocol']) ? $params['protocol'] : $request['protocol'];
 			$domain = isset($params['domain']) ? $params['domain'] : $request['domain'];
-			$port = isset($params['port']) ? $params['port'] : $request['port'];
+			
+			if(isset($params['port'])) {
+				$port = (string) $params['port'];
+			} elseif($protocol === 'https') {
+				$port = '443';
+			} else {
+				$port = $request['port'];
+			}
+			$port = $port === '80' && $protocol === 'http' || $port === '443' && $protocol === 'https' ? '' : ':'.$port;
 			$path = isset($params['path']) ? $params['path'] : $request['path'];
-			$base = ($protocol !== '' ? $protocol . '://' : '//') . $domain . ($port != '80' ? ':' . $port : '') . '/' . $path;
+			$base = ($protocol !== '' ? $protocol . '://' : '//') . $domain . $port. '/' . $path;
+			
 		}
 		return rtrim($base, '/') . '/' . $uri;
 	}

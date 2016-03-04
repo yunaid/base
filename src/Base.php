@@ -77,18 +77,16 @@ class Base
 	public function http()
 	{
 		
-		// get function from the router
-		// this function is defined with the route
-		// if there is no function defined, a controller will be used
-		$function = $this->container->get('base.router')->execute();
+		// get callback from the router
+		$callback = $this->container->get('base.router')->execute();
 
 		// get request & response
 		$request = $this->container->get('base.http.request');
 		$response = $this->container->get('base.http.response');
 
-		if (is_object($function) && method_exists($function, '__invoke')) {
+		if (is_object($callback) && method_exists($callback, '__invoke')) {
 			// execute closure
-			$body = $function($request, $response);
+			$body = $callback($request, $response);
 
 			// use it as response body if anything was returned
 			if ($body !== null) {
@@ -99,6 +97,7 @@ class Base
 			if (!$request->get('controller')) {
 				throw new ApplicationException('No controller set in request params');
 			}
+			
 			$controller = $this->container->get('base.controller', $request->get('controller'));
 
 			// get action
@@ -151,7 +150,7 @@ class Base
 		$cli = $this->container->get('base.cli');
 		if($class = $cli->command()){
 			$command = $this->container->get('base.command', $class);
-			$command->execute($cli);
+			$command->execute($cli->arguments());
 		}
 	}
 }

@@ -40,6 +40,7 @@ class CLI
 		return $this->command;
 	}
 
+	
 	// get arguments
 	public function arguments()
 	{
