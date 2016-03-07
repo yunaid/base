@@ -79,7 +79,11 @@ class File extends \Base\Cache\Adapter
 
 			if ($data->eof()) {
 				// end of file: cache is corrupted: delete it and return default
-				unlink($file->getRealPath());
+				$path = $file->getRealPath();
+				// remove pointers to prevent not allowed
+				$data = null;	
+				$file = null;	
+				unlink($path);
 				return $default;
 			}
 

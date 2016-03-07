@@ -4,7 +4,7 @@ namespace Base;
 
 use \Base\View\Engine as Engine;
 
-class View
+class View implements \JsonSerializable
 {
 	/**
 	 * Unique id for all the view files
@@ -41,6 +41,12 @@ class View
 	 * @var array 
 	 */
 	protected $blocks = [];
+	
+	/**
+	 * Rendered string, used to cache a view
+	 * @var string 
+	 */
+	protected $rendered = null;
 
 	
 	/**
@@ -113,11 +119,17 @@ class View
 	
 	/**
 	 * Let the engine render this view
+	 * There might be a pre-rendered version, when the view object was serialized (see __sleep())
+	 * If that's the case: use that version
 	 * @return string
 	 */
 	public function render()
 	{
-		return $this->engine->render($this->id, $this->file, $this->data, $this->blocks);
+		if($this->rendered !== null) {
+			return $this->rendered;
+		} else {
+			return $this->engine->render($this->id, $this->file, $this->data, $this->blocks);
+		}
 	}
 
 	
@@ -129,6 +141,28 @@ class View
 	{
 		return $this->render();
 	}
+	
+	
+	/**
+	 * When serializing, render the view and store the result
+	 * This might happen when someone caches the unrendered view
+	 * @return array
+	 */
+	public function __sleep()
+	{
+		$this->rendered = $this->render();
+		return ['rendered'];
+	}
+	
+	
+	/**
+	 * When json_encoding return the rendered result
+	 * @return string
+	 */
+	public function jsonSerialize() 
+	{
+      return $this->render();
+    }
 	
 	
 	/**
